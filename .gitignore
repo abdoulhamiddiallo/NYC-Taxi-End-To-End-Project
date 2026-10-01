@@ -1,0 +1,13 @@
+# API payloads written by the generators (base64, rebuilt on demand)
+build/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Editors and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
