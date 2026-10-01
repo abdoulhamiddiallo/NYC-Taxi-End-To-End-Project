@@ -1,0 +1,194 @@
+{
+ "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+ "name": "742889d89e",
+ "position": {
+  "x": 1202,
+  "y": 234,
+  "z": 2000,
+  "height": 298,
+  "width": 374
+ },
+ "visual": {
+  "visualType": "lineChart",
+  "query": {
+   "queryState": {
+    "Category": {
+     "projections": [
+      {
+       "field": {
+        "Column": {
+         "Expression": {
+          "SourceRef": {
+           "Entity": "Hour"
+          }
+         },
+         "Property": "hour_key"
+        }
+       },
+       "queryRef": "Hour.hour_key"
+      }
+     ]
+    },
+    "Y": {
+     "projections": [
+      {
+       "field": {
+        "Measure": {
+         "Expression": {
+          "SourceRef": {
+           "Entity": "Trips"
+          }
+         },
+         "Property": "Tip Rate"
+        }
+       },
+       "queryRef": "Trips.Tip Rate"
+      }
+     ]
+    }
+   }
+  },
+  "objects": {
+   "valueAxis": [
+    {
+     "properties": {
+      "show": {
+       "expr": {
+        "Literal": {
+         "Value": "true"
+        }
+       }
+      },
+      "labelDisplayUnits": {
+       "expr": {
+        "Literal": {
+         "Value": "0D"
+        }
+       }
+      },
+      "showAxisTitle": {
+       "expr": {
+        "Literal": {
+         "Value": "false"
+        }
+       }
+      }
+     }
+    }
+   ],
+   "categoryAxis": [
+    {
+     "properties": {
+      "axisType": {
+       "expr": {
+        "Literal": {
+         "Value": "'Scalar'"
+        }
+       }
+      },
+      "showAxisTitle": {
+       "expr": {
+        "Literal": {
+         "Value": "true"
+        }
+       }
+      },
+      "titleText": {
+       "expr": {
+        "Literal": {
+         "Value": "'Hour of day'"
+        }
+       }
+      }
+     }
+    }
+   ],
+   "legend": [
+    {
+     "properties": {
+      "show": {
+       "expr": {
+        "Literal": {
+         "Value": "false"
+        }
+       }
+      },
+      "position": {
+       "expr": {
+        "Literal": {
+         "Value": "'Top'"
+        }
+       }
+      },
+      "showTitle": {
+       "expr": {
+        "Literal": {
+         "Value": "false"
+        }
+       }
+      }
+     }
+    }
+   ],
+   "dataPoint": [
+    {
+     "properties": {
+      "fill": {
+       "solid": {
+        "color": {
+         "expr": {
+          "Literal": {
+           "Value": "'#3DDC97'"
+          }
+         }
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  "visualContainerObjects": {
+   "title": [
+    {
+     "properties": {
+      "show": {
+       "expr": {
+        "Literal": {
+         "Value": "true"
+        }
+       }
+      },
+      "text": {
+       "expr": {
+        "Literal": {
+         "Value": "'Tip rate by hour'"
+        }
+       }
+      }
+     }
+    }
+   ],
+   "subTitle": [
+    {
+     "properties": {
+      "show": {
+       "expr": {
+        "Literal": {
+         "Value": "true"
+        }
+       }
+      },
+      "text": {
+       "expr": {
+        "Literal": {
+         "Value": "'Card tips as a share of card fares, hour of day 0 to 23'"
+        }
+       }
+      }
+     }
+    }
+   ]
+  }
+ }
+}

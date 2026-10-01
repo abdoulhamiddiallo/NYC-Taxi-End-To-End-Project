@@ -1,0 +1,351 @@
+{
+ "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+ "name": "4e75c961e8",
+ "position": {
+  "x": 24,
+  "y": 234,
+  "z": 1800,
+  "height": 622,
+  "width": 760
+ },
+ "visual": {
+  "visualType": "azureMap",
+  "query": {
+   "queryState": {
+    "Category": {
+     "projections": [
+      {
+       "field": {
+        "Column": {
+         "Expression": {
+          "SourceRef": {
+           "Entity": "Pickup Zone"
+          }
+         },
+         "Property": "Pickup Zone (Borough)"
+        }
+       },
+       "queryRef": "Pickup Zone.Pickup Zone (Borough)"
+      }
+     ]
+    },
+    "Y": {
+     "projections": [
+      {
+       "field": {
+        "Aggregation": {
+         "Expression": {
+          "Column": {
+           "Expression": {
+            "SourceRef": {
+             "Entity": "Pickup Zone"
+            }
+           },
+           "Property": "Pickup Latitude"
+          }
+         },
+         "Function": 1
+        }
+       },
+       "queryRef": "1(Pickup Zone.Pickup Latitude)"
+      }
+     ]
+    },
+    "X": {
+     "projections": [
+      {
+       "field": {
+        "Aggregation": {
+         "Expression": {
+          "Column": {
+           "Expression": {
+            "SourceRef": {
+             "Entity": "Pickup Zone"
+            }
+           },
+           "Property": "Pickup Longitude"
+          }
+         },
+         "Function": 1
+        }
+       },
+       "queryRef": "1(Pickup Zone.Pickup Longitude)"
+      }
+     ]
+    },
+    "Size": {
+     "projections": [
+      {
+       "field": {
+        "Measure": {
+         "Expression": {
+          "SourceRef": {
+           "Entity": "Trips"
+          }
+         },
+         "Property": "Trips"
+        }
+       },
+       "queryRef": "Trips.Trips"
+      }
+     ]
+    }
+   }
+  },
+  "objects": {
+   "legend": [
+    {
+     "properties": {
+      "show": {
+       "expr": {
+        "Literal": {
+         "Value": "false"
+        }
+       }
+      },
+      "position": {
+       "expr": {
+        "Literal": {
+         "Value": "'Top'"
+        }
+       }
+      },
+      "showTitle": {
+       "expr": {
+        "Literal": {
+         "Value": "false"
+        }
+       }
+      }
+     }
+    }
+   ],
+   "dataPoint": [
+    {
+     "properties": {
+      "fill": {
+       "solid": {
+        "color": {
+         "expr": {
+          "Literal": {
+           "Value": "'#F5C518'"
+          }
+         }
+        }
+       }
+      }
+     }
+    }
+   ],
+   "mapControls": [
+    {
+     "properties": {
+      "defaultStyle": {
+       "expr": {
+        "Literal": {
+         "Value": "'night'"
+        }
+       }
+      },
+      "showStylePicker": {
+       "expr": {
+        "Literal": {
+         "Value": "false"
+        }
+       }
+      },
+      "showNavigationControls": {
+       "expr": {
+        "Literal": {
+         "Value": "false"
+        }
+       }
+      },
+      "showSelectionControl": {
+       "expr": {
+        "Literal": {
+         "Value": "false"
+        }
+       }
+      },
+      "zoom": {
+       "expr": {
+        "Literal": {
+         "Value": "9.5D"
+        }
+       }
+      },
+      "centerLatitude": {
+       "expr": {
+        "Literal": {
+         "Value": "40.7127D"
+        }
+       }
+      },
+      "centerLongitude": {
+       "expr": {
+        "Literal": {
+         "Value": "-73.9723D"
+        }
+       }
+      }
+     }
+    }
+   ],
+   "bubbleLayer": [
+    {
+     "properties": {
+      "show": {
+       "expr": {
+        "Literal": {
+         "Value": "true"
+        }
+       }
+      },
+      "bubbleRadius": {
+       "expr": {
+        "Literal": {
+         "Value": "4L"
+        }
+       }
+      },
+      "minBubbleRadius": {
+       "expr": {
+        "Literal": {
+         "Value": "4L"
+        }
+       }
+      },
+      "maxRadius": {
+       "expr": {
+        "Literal": {
+         "Value": "14L"
+        }
+       }
+      },
+      "bubbleStrokeWidth": {
+       "expr": {
+        "Literal": {
+         "Value": "1L"
+        }
+       }
+      },
+      "autoStrokeColor": {
+       "expr": {
+        "Literal": {
+         "Value": "true"
+        }
+       }
+      },
+      "fillColor": {
+       "solid": {
+        "color": {
+         "expr": {
+          "Literal": {
+           "Value": "'#F5C518'"
+          }
+         }
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  "visualContainerObjects": {
+   "title": [
+    {
+     "properties": {
+      "show": {
+       "expr": {
+        "Literal": {
+         "Value": "true"
+        }
+       }
+      },
+      "text": {
+       "expr": {
+        "Literal": {
+         "Value": "'Pickup map'"
+        }
+       }
+      }
+     }
+    }
+   ],
+   "subTitle": [
+    {
+     "properties": {
+      "show": {
+       "expr": {
+        "Literal": {
+         "Value": "true"
+        }
+       }
+      },
+      "text": {
+       "expr": {
+        "Literal": {
+         "Value": "'Bubble size is the number of pickups in each TLC zone'"
+        }
+       }
+      }
+     }
+    }
+   ]
+  }
+ },
+ "filterConfig": {
+  "filters": [
+   {
+    "name": "lat",
+    "field": {
+     "Column": {
+      "Expression": {
+       "SourceRef": {
+        "Entity": "Pickup Zone"
+       }
+      },
+      "Property": "Pickup Latitude"
+     }
+    },
+    "type": "Advanced",
+    "howCreated": "User",
+    "filter": {
+     "Version": 2,
+     "From": [
+      {
+       "Name": "s",
+       "Entity": "Pickup Zone",
+       "Type": 0
+      }
+     ],
+     "Where": [
+      {
+       "Condition": {
+        "Comparison": {
+         "ComparisonKind": 1,
+         "Left": {
+          "Column": {
+           "Expression": {
+            "SourceRef": {
+             "Source": "s"
+            }
+           },
+           "Property": "Pickup Latitude"
+          }
+         },
+         "Right": {
+          "Literal": {
+           "Value": "30D"
+          }
+         }
+        }
+       }
+      }
+     ]
+    }
+   }
+  ]
+ }
+}

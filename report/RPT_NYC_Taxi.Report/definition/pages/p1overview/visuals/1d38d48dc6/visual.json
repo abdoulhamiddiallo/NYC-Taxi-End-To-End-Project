@@ -1,0 +1,271 @@
+{
+ "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+ "name": "1d38d48dc6",
+ "position": {
+  "x": 554,
+  "y": 546,
+  "z": 2100,
+  "height": 310,
+  "width": 516
+ },
+ "visual": {
+  "visualType": "barChart",
+  "query": {
+   "queryState": {
+    "Category": {
+     "projections": [
+      {
+       "field": {
+        "Column": {
+         "Expression": {
+          "SourceRef": {
+           "Entity": "Pickup Zone"
+          }
+         },
+         "Property": "Pickup Zone"
+        }
+       },
+       "queryRef": "Pickup Zone.Pickup Zone"
+      }
+     ]
+    },
+    "Y": {
+     "projections": [
+      {
+       "field": {
+        "Measure": {
+         "Expression": {
+          "SourceRef": {
+           "Entity": "Trips"
+          }
+         },
+         "Property": "Trips"
+        }
+       },
+       "queryRef": "Trips.Trips"
+      }
+     ]
+    }
+   },
+   "sortDefinition": {
+    "sort": [
+     {
+      "field": {
+       "Measure": {
+        "Expression": {
+         "SourceRef": {
+          "Entity": "Trips"
+         }
+        },
+        "Property": "Trips"
+       }
+      },
+      "direction": "Descending"
+     }
+    ],
+    "isDefaultSort": true
+   }
+  },
+  "objects": {
+   "valueAxis": [
+    {
+     "properties": {
+      "show": {
+       "expr": {
+        "Literal": {
+         "Value": "false"
+        }
+       }
+      },
+      "showAxisTitle": {
+       "expr": {
+        "Literal": {
+         "Value": "false"
+        }
+       }
+      }
+     }
+    }
+   ],
+   "categoryAxis": [
+    {
+     "properties": {
+      "showAxisTitle": {
+       "expr": {
+        "Literal": {
+         "Value": "false"
+        }
+       }
+      },
+      "maxMarginFactor": {
+       "expr": {
+        "Literal": {
+         "Value": "45L"
+        }
+       }
+      }
+     }
+    }
+   ],
+   "legend": [
+    {
+     "properties": {
+      "show": {
+       "expr": {
+        "Literal": {
+         "Value": "false"
+        }
+       }
+      },
+      "position": {
+       "expr": {
+        "Literal": {
+         "Value": "'Top'"
+        }
+       }
+      },
+      "showTitle": {
+       "expr": {
+        "Literal": {
+         "Value": "false"
+        }
+       }
+      }
+     }
+    }
+   ],
+   "labels": [
+    {
+     "properties": {
+      "show": {
+       "expr": {
+        "Literal": {
+         "Value": "true"
+        }
+       }
+      },
+      "labelDisplayUnits": {
+       "expr": {
+        "Literal": {
+         "Value": "0D"
+        }
+       }
+      }
+     }
+    }
+   ],
+   "dataPoint": [
+    {
+     "properties": {
+      "fill": {
+       "solid": {
+        "color": {
+         "expr": {
+          "Literal": {
+           "Value": "'#F5C518'"
+          }
+         }
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  "visualContainerObjects": {
+   "title": [
+    {
+     "properties": {
+      "show": {
+       "expr": {
+        "Literal": {
+         "Value": "true"
+        }
+       }
+      },
+      "text": {
+       "expr": {
+        "Literal": {
+         "Value": "'Top 10 pickup zones'"
+        }
+       }
+      }
+     }
+    }
+   ],
+   "subTitle": [
+    {
+     "properties": {
+      "show": {
+       "expr": {
+        "Literal": {
+         "Value": "true"
+        }
+       }
+      },
+      "text": {
+       "expr": {
+        "Literal": {
+         "Value": "'Busiest zones by number of pickups'"
+        }
+       }
+      }
+     }
+    }
+   ]
+  }
+ },
+ "filterConfig": {
+  "filters": [
+   {
+    "name": "mf",
+    "field": {
+     "Measure": {
+      "Expression": {
+       "SourceRef": {
+        "Entity": "Trips"
+       }
+      },
+      "Property": "Pickup Zone Rank"
+     }
+    },
+    "type": "Advanced",
+    "howCreated": "User",
+    "filter": {
+     "Version": 2,
+     "From": [
+      {
+       "Name": "m",
+       "Entity": "Trips",
+       "Type": 0
+      }
+     ],
+     "Where": [
+      {
+       "Condition": {
+        "Comparison": {
+         "ComparisonKind": 4,
+         "Left": {
+          "Measure": {
+           "Expression": {
+            "SourceRef": {
+             "Source": "m"
+            }
+           },
+           "Property": "Pickup Zone Rank"
+          }
+         },
+         "Right": {
+          "Literal": {
+           "Value": "10L"
+          }
+         }
+        }
+       }
+      }
+     ]
+    }
+   }
+  ]
+ }
+}

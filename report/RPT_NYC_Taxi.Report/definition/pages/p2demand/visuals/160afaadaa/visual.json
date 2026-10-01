@@ -1,0 +1,103 @@
+{
+ "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+ "name": "160afaadaa",
+ "position": {
+  "x": 1334,
+  "y": 100,
+  "z": 1600,
+  "height": 116,
+  "width": 248
+ },
+ "visual": {
+  "visualType": "card",
+  "query": {
+   "queryState": {
+    "Values": {
+     "projections": [
+      {
+       "field": {
+        "Measure": {
+         "Expression": {
+          "SourceRef": {
+           "Entity": "Trips"
+          }
+         },
+         "Property": "Busiest Day"
+        }
+       },
+       "queryRef": "Trips.Busiest Day"
+      }
+     ]
+    }
+   }
+  },
+  "objects": {
+   "labels": [
+    {
+     "properties": {
+      "fontSize": {
+       "expr": {
+        "Literal": {
+         "Value": "22D"
+        }
+       }
+      },
+      "color": {
+       "solid": {
+        "color": {
+         "expr": {
+          "Literal": {
+           "Value": "'#3DDC97'"
+          }
+         }
+        }
+       }
+      },
+      "labelDisplayUnits": {
+       "expr": {
+        "Literal": {
+         "Value": "1D"
+        }
+       }
+      }
+     }
+    }
+   ],
+   "categoryLabels": [
+    {
+     "properties": {
+      "show": {
+       "expr": {
+        "Literal": {
+         "Value": "false"
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  "visualContainerObjects": {
+   "title": [
+    {
+     "properties": {
+      "show": {
+       "expr": {
+        "Literal": {
+         "Value": "true"
+        }
+       }
+      },
+      "text": {
+       "expr": {
+        "Literal": {
+         "Value": "'BUSIEST DAY'"
+        }
+       }
+      }
+     }
+    }
+   ]
+  }
+ }
+}

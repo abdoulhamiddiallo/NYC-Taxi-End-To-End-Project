@@ -1,0 +1,103 @@
+{
+ "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+ "name": "2c675c788a",
+ "position": {
+  "x": 286,
+  "y": 100,
+  "z": 800,
+  "height": 116,
+  "width": 248
+ },
+ "visual": {
+  "visualType": "card",
+  "query": {
+   "queryState": {
+    "Values": {
+     "projections": [
+      {
+       "field": {
+        "Measure": {
+         "Expression": {
+          "SourceRef": {
+           "Entity": "Trips"
+          }
+         },
+         "Property": "Revenue per Trip"
+        }
+       },
+       "queryRef": "Trips.Revenue per Trip"
+      }
+     ]
+    }
+   }
+  },
+  "objects": {
+   "labels": [
+    {
+     "properties": {
+      "fontSize": {
+       "expr": {
+        "Literal": {
+         "Value": "28D"
+        }
+       }
+      },
+      "color": {
+       "solid": {
+        "color": {
+         "expr": {
+          "Literal": {
+           "Value": "'#1B2333'"
+          }
+         }
+        }
+       }
+      },
+      "labelDisplayUnits": {
+       "expr": {
+        "Literal": {
+         "Value": "1D"
+        }
+       }
+      }
+     }
+    }
+   ],
+   "categoryLabels": [
+    {
+     "properties": {
+      "show": {
+       "expr": {
+        "Literal": {
+         "Value": "false"
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  "visualContainerObjects": {
+   "title": [
+    {
+     "properties": {
+      "show": {
+       "expr": {
+        "Literal": {
+         "Value": "true"
+        }
+       }
+      },
+      "text": {
+       "expr": {
+        "Literal": {
+         "Value": "'REVENUE PER TRIP'"
+        }
+       }
+      }
+     }
+    }
+   ]
+  }
+ }
+}

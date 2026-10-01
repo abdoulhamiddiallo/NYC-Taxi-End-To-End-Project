@@ -1,0 +1,104 @@
+{
+ "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+ "name": "91ece8413a",
+ "position": {
+  "x": 1262,
+  "y": 16,
+  "z": 400,
+  "height": 46,
+  "width": 314
+ },
+ "visual": {
+  "visualType": "slicer",
+  "query": {
+   "queryState": {
+    "Values": {
+     "projections": [
+      {
+       "field": {
+        "Column": {
+         "Expression": {
+          "SourceRef": {
+           "Entity": "Date"
+          }
+         },
+         "Property": "Day Type"
+        }
+       },
+       "queryRef": "Date.Day Type"
+      }
+     ]
+    }
+   }
+  },
+  "objects": {
+   "general": [
+    {
+     "properties": {
+      "orientation": {
+       "expr": {
+        "Literal": {
+         "Value": "1D"
+        }
+       }
+      }
+     }
+    }
+   ],
+   "header": [
+    {
+     "properties": {
+      "show": {
+       "expr": {
+        "Literal": {
+         "Value": "false"
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  "visualContainerObjects": {
+   "title": [
+    {
+     "properties": {
+      "show": {
+       "expr": {
+        "Literal": {
+         "Value": "false"
+        }
+       }
+      }
+     }
+    }
+   ],
+   "background": [
+    {
+     "properties": {
+      "show": {
+       "expr": {
+        "Literal": {
+         "Value": "false"
+        }
+       }
+      }
+     }
+    }
+   ],
+   "border": [
+    {
+     "properties": {
+      "show": {
+       "expr": {
+        "Literal": {
+         "Value": "false"
+        }
+       }
+      }
+     }
+    }
+   ]
+  }
+ }
+}

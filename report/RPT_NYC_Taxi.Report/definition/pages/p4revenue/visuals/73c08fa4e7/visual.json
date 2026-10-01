@@ -1,0 +1,77 @@
+{
+ "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+ "name": "73c08fa4e7",
+ "position": {
+  "x": 24,
+  "y": 58,
+  "z": 200,
+  "height": 40,
+  "width": 1000
+ },
+ "visual": {
+  "visualType": "textbox",
+  "objects": {
+   "general": [
+    {
+     "properties": {
+      "paragraphs": [
+       {
+        "textRuns": [
+         {
+          "value": "Revenue mix, payment habits, tipping and the 2025 congestion fees",
+          "textStyle": {
+           "fontSize": "12pt",
+           "color": "#A7B1C6"
+          }
+         }
+        ],
+        "horizontalTextAlignment": "left"
+       }
+      ]
+     }
+    }
+   ]
+  },
+  "visualContainerObjects": {
+   "title": [
+    {
+     "properties": {
+      "show": {
+       "expr": {
+        "Literal": {
+         "Value": "false"
+        }
+       }
+      }
+     }
+    }
+   ],
+   "background": [
+    {
+     "properties": {
+      "show": {
+       "expr": {
+        "Literal": {
+         "Value": "false"
+        }
+       }
+      }
+     }
+    }
+   ],
+   "border": [
+    {
+     "properties": {
+      "show": {
+       "expr": {
+        "Literal": {
+         "Value": "false"
+        }
+       }
+      }
+     }
+    }
+   ]
+  }
+ }
+}

@@ -1,0 +1,280 @@
+{
+ "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+ "name": "3040807cb7",
+ "position": {
+  "x": 24,
+  "y": 234,
+  "z": 1800,
+  "height": 298,
+  "width": 780
+ },
+ "visual": {
+  "visualType": "columnChart",
+  "query": {
+   "queryState": {
+    "Category": {
+     "projections": [
+      {
+       "field": {
+        "Column": {
+         "Expression": {
+          "SourceRef": {
+           "Entity": "Date"
+          }
+         },
+         "Property": "Month Label"
+        }
+       },
+       "queryRef": "Date.Month Label"
+      }
+     ]
+    },
+    "Y": {
+     "projections": [
+      {
+       "field": {
+        "Measure": {
+         "Expression": {
+          "SourceRef": {
+           "Entity": "Trips"
+          }
+         },
+         "Property": "Fare Revenue"
+        }
+       },
+       "queryRef": "Trips.Fare Revenue",
+       "displayName": "Fares"
+      },
+      {
+       "field": {
+        "Measure": {
+         "Expression": {
+          "SourceRef": {
+           "Entity": "Trips"
+          }
+         },
+         "Property": "Tips"
+        }
+       },
+       "queryRef": "Trips.Tips",
+       "displayName": "Tips"
+      },
+      {
+       "field": {
+        "Measure": {
+         "Expression": {
+          "SourceRef": {
+           "Entity": "Trips"
+          }
+         },
+         "Property": "Surcharges"
+        }
+       },
+       "queryRef": "Trips.Surcharges",
+       "displayName": "Surcharges and fees"
+      },
+      {
+       "field": {
+        "Measure": {
+         "Expression": {
+          "SourceRef": {
+           "Entity": "Trips"
+          }
+         },
+         "Property": "Tolls"
+        }
+       },
+       "queryRef": "Trips.Tolls",
+       "displayName": "Tolls"
+      }
+     ]
+    }
+   }
+  },
+  "objects": {
+   "valueAxis": [
+    {
+     "properties": {
+      "show": {
+       "expr": {
+        "Literal": {
+         "Value": "true"
+        }
+       }
+      },
+      "labelDisplayUnits": {
+       "expr": {
+        "Literal": {
+         "Value": "0D"
+        }
+       }
+      },
+      "showAxisTitle": {
+       "expr": {
+        "Literal": {
+         "Value": "false"
+        }
+       }
+      }
+     }
+    }
+   ],
+   "categoryAxis": [
+    {
+     "properties": {
+      "showAxisTitle": {
+       "expr": {
+        "Literal": {
+         "Value": "false"
+        }
+       }
+      }
+     }
+    }
+   ],
+   "legend": [
+    {
+     "properties": {
+      "show": {
+       "expr": {
+        "Literal": {
+         "Value": "true"
+        }
+       }
+      },
+      "position": {
+       "expr": {
+        "Literal": {
+         "Value": "'Top'"
+        }
+       }
+      },
+      "showTitle": {
+       "expr": {
+        "Literal": {
+         "Value": "false"
+        }
+       }
+      }
+     }
+    }
+   ],
+   "dataPoint": [
+    {
+     "properties": {
+      "fill": {
+       "solid": {
+        "color": {
+         "expr": {
+          "Literal": {
+           "Value": "'#F5C518'"
+          }
+         }
+        }
+       }
+      }
+     },
+     "selector": {
+      "metadata": "Trips.Fare Revenue"
+     }
+    },
+    {
+     "properties": {
+      "fill": {
+       "solid": {
+        "color": {
+         "expr": {
+          "Literal": {
+           "Value": "'#3DDC97'"
+          }
+         }
+        }
+       }
+      }
+     },
+     "selector": {
+      "metadata": "Trips.Tips"
+     }
+    },
+    {
+     "properties": {
+      "fill": {
+       "solid": {
+        "color": {
+         "expr": {
+          "Literal": {
+           "Value": "'#FF6B6B'"
+          }
+         }
+        }
+       }
+      }
+     },
+     "selector": {
+      "metadata": "Trips.Surcharges"
+     }
+    },
+    {
+     "properties": {
+      "fill": {
+       "solid": {
+        "color": {
+         "expr": {
+          "Literal": {
+           "Value": "'#4CC9F0'"
+          }
+         }
+        }
+       }
+      }
+     },
+     "selector": {
+      "metadata": "Trips.Tolls"
+     }
+    }
+   ]
+  },
+  "visualContainerObjects": {
+   "title": [
+    {
+     "properties": {
+      "show": {
+       "expr": {
+        "Literal": {
+         "Value": "true"
+        }
+       }
+      },
+      "text": {
+       "expr": {
+        "Literal": {
+         "Value": "'Revenue mix by month'"
+        }
+       }
+      }
+     }
+    }
+   ],
+   "subTitle": [
+    {
+     "properties": {
+      "show": {
+       "expr": {
+        "Literal": {
+         "Value": "true"
+        }
+       }
+      },
+      "text": {
+       "expr": {
+        "Literal": {
+         "Value": "'Stacked: fares, tips, surcharges and fees, tolls'"
+        }
+       }
+      }
+     }
+    }
+   ]
+  }
+ }
+}

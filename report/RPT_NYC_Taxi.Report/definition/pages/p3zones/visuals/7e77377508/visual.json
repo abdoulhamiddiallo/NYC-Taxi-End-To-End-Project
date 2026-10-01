@@ -1,0 +1,325 @@
+{
+ "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+ "name": "7e77377508",
+ "position": {
+  "x": 798,
+  "y": 234,
+  "z": 1900,
+  "height": 310,
+  "width": 778
+ },
+ "visual": {
+  "visualType": "tableEx",
+  "query": {
+   "queryState": {
+    "Values": {
+     "projections": [
+      {
+       "field": {
+        "Column": {
+         "Expression": {
+          "SourceRef": {
+           "Entity": "Pickup Zone"
+          }
+         },
+         "Property": "Pickup Zone"
+        }
+       },
+       "queryRef": "Pickup Zone.Pickup Zone",
+       "displayName": "Pickup zone"
+      },
+      {
+       "field": {
+        "Column": {
+         "Expression": {
+          "SourceRef": {
+           "Entity": "Dropoff Zone"
+          }
+         },
+         "Property": "Dropoff Zone"
+        }
+       },
+       "queryRef": "Dropoff Zone.Dropoff Zone",
+       "displayName": "Dropoff zone"
+      },
+      {
+       "field": {
+        "Column": {
+         "Expression": {
+          "SourceRef": {
+           "Entity": "Zone Flow"
+          }
+         },
+         "Property": "Flow Trips"
+        }
+       },
+       "queryRef": "Zone Flow.Flow Trips",
+       "displayName": "Trips"
+      },
+      {
+       "field": {
+        "Column": {
+         "Expression": {
+          "SourceRef": {
+           "Entity": "Zone Flow"
+          }
+         },
+         "Property": "Flow Avg Fare"
+        }
+       },
+       "queryRef": "Zone Flow.Flow Avg Fare",
+       "displayName": "Avg fare"
+      },
+      {
+       "field": {
+        "Column": {
+         "Expression": {
+          "SourceRef": {
+           "Entity": "Zone Flow"
+          }
+         },
+         "Property": "Flow Avg Duration"
+        }
+       },
+       "queryRef": "Zone Flow.Flow Avg Duration",
+       "displayName": "Avg minutes"
+      }
+     ]
+    }
+   },
+   "sortDefinition": {
+    "sort": [
+     {
+      "field": {
+       "Column": {
+        "Expression": {
+         "SourceRef": {
+          "Entity": "Zone Flow"
+         }
+        },
+        "Property": "Flow Trips"
+       }
+      },
+      "direction": "Descending"
+     }
+    ],
+    "isDefaultSort": true
+   }
+  },
+  "objects": {
+   "grid": [
+    {
+     "properties": {
+      "rowPadding": {
+       "expr": {
+        "Literal": {
+         "Value": "2D"
+        }
+       }
+      },
+      "textSize": {
+       "expr": {
+        "Literal": {
+         "Value": "10D"
+        }
+       }
+      }
+     }
+    }
+   ],
+   "columnHeaders": [
+    {
+     "properties": {
+      "fontSize": {
+       "expr": {
+        "Literal": {
+         "Value": "10D"
+        }
+       }
+      }
+     }
+    }
+   ],
+   "values": [
+    {
+     "properties": {
+      "fontSize": {
+       "expr": {
+        "Literal": {
+         "Value": "10D"
+        }
+       }
+      }
+     }
+    }
+   ],
+   "columnWidth": [
+    {
+     "properties": {
+      "value": {
+       "expr": {
+        "Literal": {
+         "Value": "210D"
+        }
+       }
+      }
+     },
+     "selector": {
+      "metadata": "Pickup Zone.Pickup Zone"
+     }
+    },
+    {
+     "properties": {
+      "value": {
+       "expr": {
+        "Literal": {
+         "Value": "210D"
+        }
+       }
+      }
+     },
+     "selector": {
+      "metadata": "Dropoff Zone.Dropoff Zone"
+     }
+    },
+    {
+     "properties": {
+      "value": {
+       "expr": {
+        "Literal": {
+         "Value": "100D"
+        }
+       }
+      }
+     },
+     "selector": {
+      "metadata": "Zone Flow.Flow Trips"
+     }
+    },
+    {
+     "properties": {
+      "value": {
+       "expr": {
+        "Literal": {
+         "Value": "100D"
+        }
+       }
+      }
+     },
+     "selector": {
+      "metadata": "Zone Flow.Flow Avg Fare"
+     }
+    },
+    {
+     "properties": {
+      "value": {
+       "expr": {
+        "Literal": {
+         "Value": "110D"
+        }
+       }
+      }
+     },
+     "selector": {
+      "metadata": "Zone Flow.Flow Avg Duration"
+     }
+    }
+   ]
+  },
+  "visualContainerObjects": {
+   "title": [
+    {
+     "properties": {
+      "show": {
+       "expr": {
+        "Literal": {
+         "Value": "true"
+        }
+       }
+      },
+      "text": {
+       "expr": {
+        "Literal": {
+         "Value": "'Top 8 origin to destination flows'"
+        }
+       }
+      }
+     }
+    }
+   ],
+   "subTitle": [
+    {
+     "properties": {
+      "show": {
+       "expr": {
+        "Literal": {
+         "Value": "true"
+        }
+       }
+      },
+      "text": {
+       "expr": {
+        "Literal": {
+         "Value": "'Trips, average fare and average duration over the year'"
+        }
+       }
+      }
+     }
+    }
+   ]
+  }
+ },
+ "filterConfig": {
+  "filters": [
+   {
+    "name": "f1",
+    "field": {
+     "Column": {
+      "Expression": {
+       "SourceRef": {
+        "Entity": "Zone Flow"
+       }
+      },
+      "Property": "Flow Rank"
+     }
+    },
+    "type": "Advanced",
+    "howCreated": "User",
+    "filter": {
+     "Version": 2,
+     "From": [
+      {
+       "Name": "s",
+       "Entity": "Zone Flow",
+       "Type": 0
+      }
+     ],
+     "Where": [
+      {
+       "Condition": {
+        "Comparison": {
+         "ComparisonKind": 4,
+         "Left": {
+          "Column": {
+           "Expression": {
+            "SourceRef": {
+             "Source": "s"
+            }
+           },
+           "Property": "Flow Rank"
+          }
+         },
+         "Right": {
+          "Literal": {
+           "Value": "8L"
+          }
+         }
+        }
+       }
+      }
+     ]
+    }
+   }
+  ]
+ }
+}

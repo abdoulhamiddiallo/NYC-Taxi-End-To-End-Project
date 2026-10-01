@@ -1,0 +1,261 @@
+{
+ "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+ "name": "507366245d",
+ "position": {
+  "x": 818,
+  "y": 546,
+  "z": 2200,
+  "height": 310,
+  "width": 758
+ },
+ "visual": {
+  "visualType": "lineChart",
+  "query": {
+   "queryState": {
+    "Category": {
+     "projections": [
+      {
+       "field": {
+        "Column": {
+         "Expression": {
+          "SourceRef": {
+           "Entity": "Date"
+          }
+         },
+         "Property": "Month Label"
+        }
+       },
+       "queryRef": "Date.Month Label"
+      }
+     ]
+    },
+    "Y": {
+     "projections": [
+      {
+       "field": {
+        "Measure": {
+         "Expression": {
+          "SourceRef": {
+           "Entity": "Trips"
+          }
+         },
+         "Property": "Congestion Surcharge"
+        }
+       },
+       "queryRef": "Trips.Congestion Surcharge",
+       "displayName": "Congestion surcharge"
+      },
+      {
+       "field": {
+        "Measure": {
+         "Expression": {
+          "SourceRef": {
+           "Entity": "Trips"
+          }
+         },
+         "Property": "CBD Congestion Fee"
+        }
+       },
+       "queryRef": "Trips.CBD Congestion Fee",
+       "displayName": "CBD congestion fee"
+      },
+      {
+       "field": {
+        "Measure": {
+         "Expression": {
+          "SourceRef": {
+           "Entity": "Trips"
+          }
+         },
+         "Property": "Airport Fee"
+        }
+       },
+       "queryRef": "Trips.Airport Fee",
+       "displayName": "Airport fee"
+      }
+     ]
+    }
+   }
+  },
+  "objects": {
+   "valueAxis": [
+    {
+     "properties": {
+      "show": {
+       "expr": {
+        "Literal": {
+         "Value": "true"
+        }
+       }
+      },
+      "labelDisplayUnits": {
+       "expr": {
+        "Literal": {
+         "Value": "0D"
+        }
+       }
+      },
+      "showAxisTitle": {
+       "expr": {
+        "Literal": {
+         "Value": "false"
+        }
+       }
+      }
+     }
+    }
+   ],
+   "categoryAxis": [
+    {
+     "properties": {
+      "showAxisTitle": {
+       "expr": {
+        "Literal": {
+         "Value": "false"
+        }
+       }
+      }
+     }
+    }
+   ],
+   "legend": [
+    {
+     "properties": {
+      "show": {
+       "expr": {
+        "Literal": {
+         "Value": "true"
+        }
+       }
+      },
+      "position": {
+       "expr": {
+        "Literal": {
+         "Value": "'Top'"
+        }
+       }
+      },
+      "showTitle": {
+       "expr": {
+        "Literal": {
+         "Value": "false"
+        }
+       }
+      }
+     }
+    }
+   ],
+   "lineStyles": [
+    {
+     "properties": {
+      "showMarker": {
+       "expr": {
+        "Literal": {
+         "Value": "true"
+        }
+       }
+      }
+     }
+    }
+   ],
+   "dataPoint": [
+    {
+     "properties": {
+      "fill": {
+       "solid": {
+        "color": {
+         "expr": {
+          "Literal": {
+           "Value": "'#4CC9F0'"
+          }
+         }
+        }
+       }
+      }
+     },
+     "selector": {
+      "metadata": "Trips.Congestion Surcharge"
+     }
+    },
+    {
+     "properties": {
+      "fill": {
+       "solid": {
+        "color": {
+         "expr": {
+          "Literal": {
+           "Value": "'#FF6B6B'"
+          }
+         }
+        }
+       }
+      }
+     },
+     "selector": {
+      "metadata": "Trips.CBD Congestion Fee"
+     }
+    },
+    {
+     "properties": {
+      "fill": {
+       "solid": {
+        "color": {
+         "expr": {
+          "Literal": {
+           "Value": "'#F5C518'"
+          }
+         }
+        }
+       }
+      }
+     },
+     "selector": {
+      "metadata": "Trips.Airport Fee"
+     }
+    }
+   ]
+  },
+  "visualContainerObjects": {
+   "title": [
+    {
+     "properties": {
+      "show": {
+       "expr": {
+        "Literal": {
+         "Value": "true"
+        }
+       }
+      },
+      "text": {
+       "expr": {
+        "Literal": {
+         "Value": "'Fees collected by month'"
+        }
+       }
+      }
+     }
+    }
+   ],
+   "subTitle": [
+    {
+     "properties": {
+      "show": {
+       "expr": {
+        "Literal": {
+         "Value": "true"
+        }
+       }
+      },
+      "text": {
+       "expr": {
+        "Literal": {
+         "Value": "'Congestion surcharge, the CBD congestion relief fee introduced on 5 January 2025, and airport fees'"
+        }
+       }
+      }
+     }
+    }
+   ]
+  }
+ }
+}

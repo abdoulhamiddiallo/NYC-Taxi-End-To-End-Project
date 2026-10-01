@@ -1,0 +1,78 @@
+{
+ "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+ "name": "a3e3c66bfc",
+ "position": {
+  "x": 24,
+  "y": 0,
+  "z": 100,
+  "height": 64,
+  "width": 520
+ },
+ "visual": {
+  "visualType": "textbox",
+  "objects": {
+   "general": [
+    {
+     "properties": {
+      "paragraphs": [
+       {
+        "textRuns": [
+         {
+          "value": "Behind the numbers",
+          "textStyle": {
+           "fontSize": "26pt",
+           "color": "#F2F5FA",
+           "fontWeight": "bold"
+          }
+         }
+        ],
+        "horizontalTextAlignment": "left"
+       }
+      ]
+     }
+    }
+   ]
+  },
+  "visualContainerObjects": {
+   "title": [
+    {
+     "properties": {
+      "show": {
+       "expr": {
+        "Literal": {
+         "Value": "false"
+        }
+       }
+      }
+     }
+    }
+   ],
+   "background": [
+    {
+     "properties": {
+      "show": {
+       "expr": {
+        "Literal": {
+         "Value": "false"
+        }
+       }
+      }
+     }
+    }
+   ],
+   "border": [
+    {
+     "properties": {
+      "show": {
+       "expr": {
+        "Literal": {
+         "Value": "false"
+        }
+       }
+      }
+     }
+    }
+   ]
+  }
+ }
+}

@@ -1,0 +1,370 @@
+{
+ "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+ "name": "fe90677869",
+ "position": {
+  "x": 798,
+  "y": 558,
+  "z": 2000,
+  "height": 298,
+  "width": 778
+ },
+ "visual": {
+  "visualType": "pivotTable",
+  "query": {
+   "queryState": {
+    "Rows": {
+     "projections": [
+      {
+       "field": {
+        "Column": {
+         "Expression": {
+          "SourceRef": {
+           "Entity": "Pickup Zone"
+          }
+         },
+         "Property": "Pickup Borough"
+        }
+       },
+       "queryRef": "Pickup Zone.Pickup Borough",
+       "displayName": "Pickup borough"
+      }
+     ]
+    },
+    "Columns": {
+     "projections": [
+      {
+       "field": {
+        "Column": {
+         "Expression": {
+          "SourceRef": {
+           "Entity": "Dropoff Zone"
+          }
+         },
+         "Property": "Dropoff Borough"
+        }
+       },
+       "queryRef": "Dropoff Zone.Dropoff Borough"
+      }
+     ]
+    },
+    "Values": {
+     "projections": [
+      {
+       "field": {
+        "Measure": {
+         "Expression": {
+          "SourceRef": {
+           "Entity": "Trips"
+          }
+         },
+         "Property": "Trips Share"
+        }
+       },
+       "queryRef": "Trips.Trips Share",
+       "displayName": "Share of trips"
+      }
+     ]
+    }
+   }
+  },
+  "objects": {
+   "grid": [
+    {
+     "properties": {
+      "rowPadding": {
+       "expr": {
+        "Literal": {
+         "Value": "2D"
+        }
+       }
+      },
+      "textSize": {
+       "expr": {
+        "Literal": {
+         "Value": "10D"
+        }
+       }
+      }
+     }
+    }
+   ],
+   "columnHeaders": [
+    {
+     "properties": {
+      "fontSize": {
+       "expr": {
+        "Literal": {
+         "Value": "10D"
+        }
+       }
+      }
+     }
+    }
+   ],
+   "values": [
+    {
+     "properties": {
+      "fontSize": {
+       "expr": {
+        "Literal": {
+         "Value": "10D"
+        }
+       }
+      }
+     }
+    }
+   ],
+   "rowHeaders": [
+    {
+     "properties": {
+      "fontSize": {
+       "expr": {
+        "Literal": {
+         "Value": "10D"
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  "visualContainerObjects": {
+   "title": [
+    {
+     "properties": {
+      "show": {
+       "expr": {
+        "Literal": {
+         "Value": "true"
+        }
+       }
+      },
+      "text": {
+       "expr": {
+        "Literal": {
+         "Value": "'Borough to borough'"
+        }
+       }
+      }
+     }
+    }
+   ],
+   "subTitle": [
+    {
+     "properties": {
+      "show": {
+       "expr": {
+        "Literal": {
+         "Value": "true"
+        }
+       }
+      },
+      "text": {
+       "expr": {
+        "Literal": {
+         "Value": "'Share of all trips from the pickup borough (rows) to the dropoff borough (columns)'"
+        }
+       }
+      }
+     }
+    }
+   ]
+  }
+ },
+ "filterConfig": {
+  "filters": [
+   {
+    "name": "pb",
+    "field": {
+     "Column": {
+      "Expression": {
+       "SourceRef": {
+        "Entity": "Pickup Zone"
+       }
+      },
+      "Property": "Pickup Borough"
+     }
+    },
+    "type": "Categorical",
+    "howCreated": "User",
+    "filter": {
+     "Version": 2,
+     "From": [
+      {
+       "Name": "s",
+       "Entity": "Pickup Zone",
+       "Type": 0
+      }
+     ],
+     "Where": [
+      {
+       "Condition": {
+        "In": {
+         "Expressions": [
+          {
+           "Column": {
+            "Expression": {
+             "SourceRef": {
+              "Source": "s"
+             }
+            },
+            "Property": "Pickup Borough"
+           }
+          }
+         ],
+         "Values": [
+          [
+           {
+            "Literal": {
+             "Value": "'Manhattan'"
+            }
+           }
+          ],
+          [
+           {
+            "Literal": {
+             "Value": "'Queens'"
+            }
+           }
+          ],
+          [
+           {
+            "Literal": {
+             "Value": "'Brooklyn'"
+            }
+           }
+          ],
+          [
+           {
+            "Literal": {
+             "Value": "'Bronx'"
+            }
+           }
+          ],
+          [
+           {
+            "Literal": {
+             "Value": "'Staten Island'"
+            }
+           }
+          ],
+          [
+           {
+            "Literal": {
+             "Value": "'EWR'"
+            }
+           }
+          ],
+          [
+           {
+            "Literal": {
+             "Value": "'Unknown'"
+            }
+           }
+          ]
+         ]
+        }
+       }
+      }
+     ]
+    }
+   },
+   {
+    "name": "db",
+    "field": {
+     "Column": {
+      "Expression": {
+       "SourceRef": {
+        "Entity": "Dropoff Zone"
+       }
+      },
+      "Property": "Dropoff Borough"
+     }
+    },
+    "type": "Categorical",
+    "howCreated": "User",
+    "filter": {
+     "Version": 2,
+     "From": [
+      {
+       "Name": "s",
+       "Entity": "Dropoff Zone",
+       "Type": 0
+      }
+     ],
+     "Where": [
+      {
+       "Condition": {
+        "In": {
+         "Expressions": [
+          {
+           "Column": {
+            "Expression": {
+             "SourceRef": {
+              "Source": "s"
+             }
+            },
+            "Property": "Dropoff Borough"
+           }
+          }
+         ],
+         "Values": [
+          [
+           {
+            "Literal": {
+             "Value": "'Manhattan'"
+            }
+           }
+          ],
+          [
+           {
+            "Literal": {
+             "Value": "'Queens'"
+            }
+           }
+          ],
+          [
+           {
+            "Literal": {
+             "Value": "'Brooklyn'"
+            }
+           }
+          ],
+          [
+           {
+            "Literal": {
+             "Value": "'Bronx'"
+            }
+           }
+          ],
+          [
+           {
+            "Literal": {
+             "Value": "'Staten Island'"
+            }
+           }
+          ],
+          [
+           {
+            "Literal": {
+             "Value": "'EWR'"
+            }
+           }
+          ],
+          [
+           {
+            "Literal": {
+             "Value": "'Unknown'"
+            }
+           }
+          ]
+         ]
+        }
+       }
+      }
+     ]
+    }
+   }
+  ]
+ }
+}

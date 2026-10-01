@@ -1,0 +1,300 @@
+{
+ "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+ "name": "9dcf4f6b75",
+ "position": {
+  "x": 24,
+  "y": 518,
+  "z": 1800,
+  "height": 338,
+  "width": 700
+ },
+ "visual": {
+  "visualType": "tableEx",
+  "query": {
+   "queryState": {
+    "Values": {
+     "projections": [
+      {
+       "field": {
+        "Column": {
+         "Expression": {
+          "SourceRef": {
+           "Entity": "Load Control"
+          }
+         },
+         "Property": "Load Month Number"
+        }
+       },
+       "queryRef": "Load Control.Load Month Number",
+       "displayName": "Month"
+      },
+      {
+       "field": {
+        "Column": {
+         "Expression": {
+          "SourceRef": {
+           "Entity": "Load Control"
+          }
+         },
+         "Property": "Silver Rows"
+        }
+       },
+       "queryRef": "Load Control.Silver Rows",
+       "displayName": "Silver rows"
+      },
+      {
+       "field": {
+        "Column": {
+         "Expression": {
+          "SourceRef": {
+           "Entity": "Load Control"
+          }
+         },
+         "Property": "Staged Rows"
+        }
+       },
+       "queryRef": "Load Control.Staged Rows",
+       "displayName": "Staged rows"
+      },
+      {
+       "field": {
+        "Column": {
+         "Expression": {
+          "SourceRef": {
+           "Entity": "Load Control"
+          }
+         },
+         "Property": "Fact Rows"
+        }
+       },
+       "queryRef": "Load Control.Fact Rows",
+       "displayName": "Fact rows"
+      },
+      {
+       "field": {
+        "Column": {
+         "Expression": {
+          "SourceRef": {
+           "Entity": "Load Control"
+          }
+         },
+         "Property": "Is Reconciled"
+        }
+       },
+       "queryRef": "Load Control.Is Reconciled",
+       "displayName": "Reconciled"
+      },
+      {
+       "field": {
+        "Column": {
+         "Expression": {
+          "SourceRef": {
+           "Entity": "Load Control"
+          }
+         },
+         "Property": "Loaded At"
+        }
+       },
+       "queryRef": "Load Control.Loaded At",
+       "displayName": "Loaded at"
+      }
+     ]
+    }
+   },
+   "sortDefinition": {
+    "sort": [
+     {
+      "field": {
+       "Column": {
+        "Expression": {
+         "SourceRef": {
+          "Entity": "Load Control"
+         }
+        },
+        "Property": "Load Month Number"
+       }
+      },
+      "direction": "Ascending"
+     }
+    ],
+    "isDefaultSort": true
+   }
+  },
+  "objects": {
+   "grid": [
+    {
+     "properties": {
+      "rowPadding": {
+       "expr": {
+        "Literal": {
+         "Value": "1D"
+        }
+       }
+      },
+      "textSize": {
+       "expr": {
+        "Literal": {
+         "Value": "10D"
+        }
+       }
+      }
+     }
+    }
+   ],
+   "columnHeaders": [
+    {
+     "properties": {
+      "fontSize": {
+       "expr": {
+        "Literal": {
+         "Value": "10D"
+        }
+       }
+      }
+     }
+    }
+   ],
+   "values": [
+    {
+     "properties": {
+      "fontSize": {
+       "expr": {
+        "Literal": {
+         "Value": "10D"
+        }
+       }
+      }
+     }
+    }
+   ],
+   "columnWidth": [
+    {
+     "properties": {
+      "value": {
+       "expr": {
+        "Literal": {
+         "Value": "70D"
+        }
+       }
+      }
+     },
+     "selector": {
+      "metadata": "Load Control.Load Month Number"
+     }
+    },
+    {
+     "properties": {
+      "value": {
+       "expr": {
+        "Literal": {
+         "Value": "110D"
+        }
+       }
+      }
+     },
+     "selector": {
+      "metadata": "Load Control.Silver Rows"
+     }
+    },
+    {
+     "properties": {
+      "value": {
+       "expr": {
+        "Literal": {
+         "Value": "110D"
+        }
+       }
+      }
+     },
+     "selector": {
+      "metadata": "Load Control.Staged Rows"
+     }
+    },
+    {
+     "properties": {
+      "value": {
+       "expr": {
+        "Literal": {
+         "Value": "110D"
+        }
+       }
+      }
+     },
+     "selector": {
+      "metadata": "Load Control.Fact Rows"
+     }
+    },
+    {
+     "properties": {
+      "value": {
+       "expr": {
+        "Literal": {
+         "Value": "100D"
+        }
+       }
+      }
+     },
+     "selector": {
+      "metadata": "Load Control.Is Reconciled"
+     }
+    },
+    {
+     "properties": {
+      "value": {
+       "expr": {
+        "Literal": {
+         "Value": "160D"
+        }
+       }
+      }
+     },
+     "selector": {
+      "metadata": "Load Control.Loaded At"
+     }
+    }
+   ]
+  },
+  "visualContainerObjects": {
+   "title": [
+    {
+     "properties": {
+      "show": {
+       "expr": {
+        "Literal": {
+         "Value": "true"
+        }
+       }
+      },
+      "text": {
+       "expr": {
+        "Literal": {
+         "Value": "'Silver to Gold reconciliation'"
+        }
+       }
+      }
+     }
+    }
+   ],
+   "subTitle": [
+    {
+     "properties": {
+      "show": {
+       "expr": {
+        "Literal": {
+         "Value": "true"
+        }
+       }
+      },
+      "text": {
+       "expr": {
+        "Literal": {
+         "Value": "'Row counts must match at every hop, the load fails otherwise'"
+        }
+       }
+      }
+     }
+    }
+   ]
+  }
+ }
+}

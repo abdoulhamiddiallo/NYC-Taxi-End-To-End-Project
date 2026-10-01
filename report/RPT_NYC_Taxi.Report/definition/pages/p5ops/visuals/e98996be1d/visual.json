@@ -1,0 +1,405 @@
+{
+ "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+ "name": "e98996be1d",
+ "position": {
+  "x": 738,
+  "y": 518,
+  "z": 1900,
+  "height": 338,
+  "width": 838
+ },
+ "visual": {
+  "visualType": "tableEx",
+  "query": {
+   "queryState": {
+    "Values": {
+     "projections": [
+      {
+       "field": {
+        "Column": {
+         "Expression": {
+          "SourceRef": {
+           "Entity": "Run Log"
+          }
+         },
+         "Property": "Step"
+        }
+       },
+       "queryRef": "Run Log.Step",
+       "displayName": "Step"
+      },
+      {
+       "field": {
+        "Column": {
+         "Expression": {
+          "SourceRef": {
+           "Entity": "Run Log"
+          }
+         },
+         "Property": "Status"
+        }
+       },
+       "queryRef": "Run Log.Status",
+       "displayName": "Status"
+      },
+      {
+       "field": {
+        "Column": {
+         "Expression": {
+          "SourceRef": {
+           "Entity": "Run Log"
+          }
+         },
+         "Property": "Started"
+        }
+       },
+       "queryRef": "Run Log.Started",
+       "displayName": "Started"
+      },
+      {
+       "field": {
+        "Column": {
+         "Expression": {
+          "SourceRef": {
+           "Entity": "Run Log"
+          }
+         },
+         "Property": "Ended"
+        }
+       },
+       "queryRef": "Run Log.Ended",
+       "displayName": "Ended"
+      },
+      {
+       "field": {
+        "Column": {
+         "Expression": {
+          "SourceRef": {
+           "Entity": "Run Log"
+          }
+         },
+         "Property": "Rows Affected"
+        }
+       },
+       "queryRef": "Run Log.Rows Affected",
+       "displayName": "Rows affected"
+      }
+     ]
+    }
+   },
+   "sortDefinition": {
+    "sort": [
+     {
+      "field": {
+       "Column": {
+        "Expression": {
+         "SourceRef": {
+          "Entity": "Run Log"
+         }
+        },
+        "Property": "Started"
+       }
+      },
+      "direction": "Descending"
+     }
+    ],
+    "isDefaultSort": true
+   }
+  },
+  "objects": {
+   "grid": [
+    {
+     "properties": {
+      "rowPadding": {
+       "expr": {
+        "Literal": {
+         "Value": "1D"
+        }
+       }
+      },
+      "textSize": {
+       "expr": {
+        "Literal": {
+         "Value": "10D"
+        }
+       }
+      }
+     }
+    }
+   ],
+   "columnHeaders": [
+    {
+     "properties": {
+      "fontSize": {
+       "expr": {
+        "Literal": {
+         "Value": "10D"
+        }
+       }
+      }
+     }
+    }
+   ],
+   "values": [
+    {
+     "properties": {
+      "fontSize": {
+       "expr": {
+        "Literal": {
+         "Value": "10D"
+        }
+       }
+      }
+     }
+    },
+    {
+     "properties": {
+      "fontColor": {
+       "solid": {
+        "color": {
+         "expr": {
+          "Conditional": {
+           "Cases": [
+            {
+             "Condition": {
+              "Comparison": {
+               "ComparisonKind": 0,
+               "Left": {
+                "Column": {
+                 "Expression": {
+                  "SourceRef": {
+                   "Entity": "Run Log"
+                  }
+                 },
+                 "Property": "Status"
+                }
+               },
+               "Right": {
+                "Literal": {
+                 "Value": "'FAILED'"
+                }
+               }
+              }
+             },
+             "Value": {
+              "Literal": {
+               "Value": "'#FF6B6B'"
+              }
+             }
+            },
+            {
+             "Condition": {
+              "Comparison": {
+               "ComparisonKind": 0,
+               "Left": {
+                "Column": {
+                 "Expression": {
+                  "SourceRef": {
+                   "Entity": "Run Log"
+                  }
+                 },
+                 "Property": "Status"
+                }
+               },
+               "Right": {
+                "Literal": {
+                 "Value": "'SUCCEEDED'"
+                }
+               }
+              }
+             },
+             "Value": {
+              "Literal": {
+               "Value": "'#3DDC97'"
+              }
+             }
+            }
+           ]
+          }
+         }
+        }
+       }
+      }
+     },
+     "selector": {
+      "data": [
+       {
+        "dataViewWildcard": {
+         "matchingOption": 1
+        }
+       }
+      ],
+      "metadata": "Run Log.Status"
+     }
+    }
+   ],
+   "columnWidth": [
+    {
+     "properties": {
+      "value": {
+       "expr": {
+        "Literal": {
+         "Value": "220D"
+        }
+       }
+      }
+     },
+     "selector": {
+      "metadata": "Run Log.Step"
+     }
+    },
+    {
+     "properties": {
+      "value": {
+       "expr": {
+        "Literal": {
+         "Value": "110D"
+        }
+       }
+      }
+     },
+     "selector": {
+      "metadata": "Run Log.Status"
+     }
+    },
+    {
+     "properties": {
+      "value": {
+       "expr": {
+        "Literal": {
+         "Value": "170D"
+        }
+       }
+      }
+     },
+     "selector": {
+      "metadata": "Run Log.Started"
+     }
+    },
+    {
+     "properties": {
+      "value": {
+       "expr": {
+        "Literal": {
+         "Value": "170D"
+        }
+       }
+      }
+     },
+     "selector": {
+      "metadata": "Run Log.Ended"
+     }
+    },
+    {
+     "properties": {
+      "value": {
+       "expr": {
+        "Literal": {
+         "Value": "120D"
+        }
+       }
+      }
+     },
+     "selector": {
+      "metadata": "Run Log.Rows Affected"
+     }
+    }
+   ]
+  },
+  "visualContainerObjects": {
+   "title": [
+    {
+     "properties": {
+      "show": {
+       "expr": {
+        "Literal": {
+         "Value": "true"
+        }
+       }
+      },
+      "text": {
+       "expr": {
+        "Literal": {
+         "Value": "'Warehouse run log'"
+        }
+       }
+      }
+     }
+    }
+   ],
+   "subTitle": [
+    {
+     "properties": {
+      "show": {
+       "expr": {
+        "Literal": {
+         "Value": "true"
+        }
+       }
+      },
+      "text": {
+       "expr": {
+        "Literal": {
+         "Value": "'The 10 most recent stored procedure steps'"
+        }
+       }
+      }
+     }
+    }
+   ]
+  }
+ },
+ "filterConfig": {
+  "filters": [
+   {
+    "name": "last10",
+    "field": {
+     "Measure": {
+      "Expression": {
+       "SourceRef": {
+        "Entity": "Trips"
+       }
+      },
+      "Property": "Step Recency"
+     }
+    },
+    "type": "Advanced",
+    "howCreated": "User",
+    "filter": {
+     "Version": 2,
+     "From": [
+      {
+       "Name": "m",
+       "Entity": "Trips",
+       "Type": 0
+      }
+     ],
+     "Where": [
+      {
+       "Condition": {
+        "Comparison": {
+         "ComparisonKind": 4,
+         "Left": {
+          "Measure": {
+           "Expression": {
+            "SourceRef": {
+             "Source": "m"
+            }
+           },
+           "Property": "Step Recency"
+          }
+         },
+         "Right": {
+          "Literal": {
+           "Value": "10L"
+          }
+         }
+        }
+       }
+      }
+     ]
+    }
+   }
+  ]
+ }
+}
