@@ -1,0 +1,63 @@
+{
+  "properties": {
+    "description": "Deploys the Power BI report as code: runs NB_03, which generates the PBIR definition and creates or updates RPT_NYC_Taxi bound to SM_NYC_Taxi.",
+    "parameters": {
+      "report_name": {
+        "type": "string",
+        "defaultValue": "RPT_NYC_Taxi"
+      },
+      "semantic_model_name": {
+        "type": "string",
+        "defaultValue": "SM_NYC_Taxi"
+      },
+      "pages": {
+        "type": "string",
+        "defaultValue": "all"
+      }
+    },
+    "activities": [
+      {
+        "name": "Deploy report",
+        "description": "Generates the PBIR parts in Python and pushes them through the Fabric REST API",
+        "type": "TridentNotebook",
+        "dependsOn": [],
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureOutput": false,
+          "secureInput": false
+        },
+        "typeProperties": {
+          "notebookId": "a86545dd-a7d4-4aea-9904-744c7ad1e2f6",
+          "workspaceId": "1930c80d-7715-4f37-b0ee-bbc0aa665783",
+          "parameters": {
+            "report_name": {
+              "value": {
+                "value": "@pipeline().parameters.report_name",
+                "type": "Expression"
+              },
+              "type": "string"
+            },
+            "semantic_model_name": {
+              "value": {
+                "value": "@pipeline().parameters.semantic_model_name",
+                "type": "Expression"
+              },
+              "type": "string"
+            },
+            "pages": {
+              "value": {
+                "value": "@pipeline().parameters.pages",
+                "type": "Expression"
+              },
+              "type": "string"
+            }
+          },
+          "sessionTag": "nyctaxi"
+        }
+      }
+    ],
+    "annotations": []
+  }
+}

@@ -1,0 +1,485 @@
+{
+  "properties": {
+    "description": "Metadata-driven medallion run: lands the requested months (parallel), builds Silver, then loads the Gold star schema month by month and rebuilds the aggregates.",
+    "parameters": {
+      "year": {
+        "type": "int",
+        "defaultValue": 2025
+      },
+      "months": {
+        "type": "array",
+        "defaultValue": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12
+        ]
+      },
+      "force_download": {
+        "type": "bool",
+        "defaultValue": false
+      },
+      "parallel_months": {
+        "type": "int",
+        "defaultValue": 4
+      }
+    },
+    "activities": [
+      {
+        "name": "Land reference files",
+        "description": "Taxi zone lookup CSV and shapefile into Bronze",
+        "type": "TridentNotebook",
+        "dependsOn": [],
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureOutput": false,
+          "secureInput": false
+        },
+        "typeProperties": {
+          "notebookId": "d3188947-c1da-425a-9f22-08e2f47da996",
+          "workspaceId": "1930c80d-7715-4f37-b0ee-bbc0aa665783",
+          "parameters": {
+            "dataset": {
+              "value": "reference",
+              "type": "string"
+            },
+            "run_id": {
+              "value": {
+                "value": "@pipeline().RunId",
+                "type": "Expression"
+              },
+              "type": "string"
+            }
+          },
+          "sessionTag": "nyctaxi"
+        }
+      },
+      {
+        "name": "Build Silver taxi zones",
+        "description": "silver_taxi_zones with centroids",
+        "type": "TridentNotebook",
+        "dependsOn": [
+          {
+            "activity": "Land reference files",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ],
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureOutput": false,
+          "secureInput": false
+        },
+        "typeProperties": {
+          "notebookId": "43eb3207-fb22-45d7-845f-ea6c6468934c",
+          "workspaceId": "1930c80d-7715-4f37-b0ee-bbc0aa665783",
+          "parameters": {
+            "mode": {
+              "value": "reference",
+              "type": "string"
+            },
+            "run_id": {
+              "value": {
+                "value": "@pipeline().RunId",
+                "type": "Expression"
+              },
+              "type": "string"
+            }
+          },
+          "sessionTag": "nyctaxi"
+        }
+      },
+      {
+        "name": "For each month - Bronze and Silver",
+        "type": "ForEach",
+        "dependsOn": [
+          {
+            "activity": "Build Silver taxi zones",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ],
+        "typeProperties": {
+          "items": {
+            "value": "@pipeline().parameters.months",
+            "type": "Expression"
+          },
+          "isSequential": false,
+          "batchCount": 4,
+          "activities": [
+            {
+              "name": "Land yellow month",
+              "description": "One monthly Parquet file into Bronze",
+              "type": "TridentNotebook",
+              "dependsOn": [],
+              "policy": {
+                "timeout": "0.12:00:00",
+                "retry": 0,
+                "retryIntervalInSeconds": 30,
+                "secureOutput": false,
+                "secureInput": false
+              },
+              "typeProperties": {
+                "notebookId": "d3188947-c1da-425a-9f22-08e2f47da996",
+                "workspaceId": "1930c80d-7715-4f37-b0ee-bbc0aa665783",
+                "parameters": {
+                  "dataset": {
+                    "value": "yellow",
+                    "type": "string"
+                  },
+                  "year": {
+                    "value": {
+                      "value": "@pipeline().parameters.year",
+                      "type": "Expression"
+                    },
+                    "type": "int"
+                  },
+                  "month": {
+                    "value": {
+                      "value": "@item()",
+                      "type": "Expression"
+                    },
+                    "type": "int"
+                  },
+                  "force": {
+                    "value": {
+                      "value": "@pipeline().parameters.force_download",
+                      "type": "Expression"
+                    },
+                    "type": "bool"
+                  },
+                  "run_id": {
+                    "value": {
+                      "value": "@pipeline().RunId",
+                      "type": "Expression"
+                    },
+                    "type": "string"
+                  }
+                },
+                "sessionTag": "nyctaxi"
+              }
+            },
+            {
+              "name": "Silver yellow month",
+              "description": "Quality gate, keys, Delta partition",
+              "type": "TridentNotebook",
+              "dependsOn": [
+                {
+                  "activity": "Land yellow month",
+                  "dependencyConditions": [
+                    "Succeeded"
+                  ]
+                }
+              ],
+              "policy": {
+                "timeout": "0.12:00:00",
+                "retry": 0,
+                "retryIntervalInSeconds": 30,
+                "secureOutput": false,
+                "secureInput": false
+              },
+              "typeProperties": {
+                "notebookId": "43eb3207-fb22-45d7-845f-ea6c6468934c",
+                "workspaceId": "1930c80d-7715-4f37-b0ee-bbc0aa665783",
+                "parameters": {
+                  "mode": {
+                    "value": "trips",
+                    "type": "string"
+                  },
+                  "year": {
+                    "value": {
+                      "value": "@pipeline().parameters.year",
+                      "type": "Expression"
+                    },
+                    "type": "int"
+                  },
+                  "month": {
+                    "value": {
+                      "value": "@item()",
+                      "type": "Expression"
+                    },
+                    "type": "int"
+                  },
+                  "run_id": {
+                    "value": {
+                      "value": "@pipeline().RunId",
+                      "type": "Expression"
+                    },
+                    "type": "string"
+                  }
+                },
+                "sessionTag": "nyctaxi"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "Sync Silver SQL endpoint",
+        "description": "Forces the metadata refresh of the Silver SQL analytics endpoint before the Warehouse reads it",
+        "type": "TridentNotebook",
+        "dependsOn": [
+          {
+            "activity": "For each month - Bronze and Silver",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ],
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureOutput": false,
+          "secureInput": false
+        },
+        "typeProperties": {
+          "notebookId": "43eb3207-fb22-45d7-845f-ea6c6468934c",
+          "workspaceId": "1930c80d-7715-4f37-b0ee-bbc0aa665783",
+          "parameters": {
+            "mode": {
+              "value": "sync",
+              "type": "string"
+            },
+            "run_id": {
+              "value": {
+                "value": "@pipeline().RunId",
+                "type": "Expression"
+              },
+              "type": "string"
+            }
+          },
+          "sessionTag": "nyctaxi"
+        }
+      },
+      {
+        "name": "Load dimensions",
+        "description": "dim_date, dim_hour, dim_zone, reference dims",
+        "type": "SqlServerStoredProcedure",
+        "dependsOn": [
+          {
+            "activity": "Sync Silver SQL endpoint",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ],
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 2,
+          "retryIntervalInSeconds": 60,
+          "secureOutput": false,
+          "secureInput": false
+        },
+        "linkedService": {
+          "name": "WH_NYC_Taxi",
+          "properties": {
+            "annotations": [],
+            "type": "DataWarehouse",
+            "typeProperties": {
+              "endpoint": "darotj3cokvunnehuukvqdnj7i-bxedagivo43u7mhoxpakuzsxqm.datawarehouse.fabric.microsoft.com",
+              "artifactId": "8b90142e-bd44-4141-99b9-1e81dc7da692",
+              "workspaceId": "1930c80d-7715-4f37-b0ee-bbc0aa665783"
+            }
+          }
+        },
+        "typeProperties": {
+          "storedProcedureName": "[etl].[usp_load_dimensions]",
+          "storedProcedureParameters": {
+            "run_id": {
+              "value": {
+                "value": "@pipeline().RunId",
+                "type": "Expression"
+              },
+              "type": "String"
+            }
+          }
+        }
+      },
+      {
+        "name": "For each month - Gold",
+        "type": "ForEach",
+        "dependsOn": [
+          {
+            "activity": "Load dimensions",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ],
+        "typeProperties": {
+          "items": {
+            "value": "@pipeline().parameters.months",
+            "type": "Expression"
+          },
+          "isSequential": true,
+          "activities": [
+            {
+              "name": "Load fact month",
+              "description": "Silver to staging to fact_trip, reconciled",
+              "type": "SqlServerStoredProcedure",
+              "dependsOn": [],
+              "policy": {
+                "timeout": "0.12:00:00",
+                "retry": 2,
+                "retryIntervalInSeconds": 60,
+                "secureOutput": false,
+                "secureInput": false
+              },
+              "linkedService": {
+                "name": "WH_NYC_Taxi",
+                "properties": {
+                  "annotations": [],
+                  "type": "DataWarehouse",
+                  "typeProperties": {
+                    "endpoint": "darotj3cokvunnehuukvqdnj7i-bxedagivo43u7mhoxpakuzsxqm.datawarehouse.fabric.microsoft.com",
+                    "artifactId": "8b90142e-bd44-4141-99b9-1e81dc7da692",
+                    "workspaceId": "1930c80d-7715-4f37-b0ee-bbc0aa665783"
+                  }
+                }
+              },
+              "typeProperties": {
+                "storedProcedureName": "[etl].[usp_load_month]",
+                "storedProcedureParameters": {
+                  "year": {
+                    "value": {
+                      "value": "@pipeline().parameters.year",
+                      "type": "Expression"
+                    },
+                    "type": "Int16"
+                  },
+                  "month": {
+                    "value": {
+                      "value": "@item()",
+                      "type": "Expression"
+                    },
+                    "type": "Int16"
+                  },
+                  "run_id": {
+                    "value": {
+                      "value": "@pipeline().RunId",
+                      "type": "Expression"
+                    },
+                    "type": "String"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "Build aggregates",
+        "description": "Serving aggregates and DQ snapshots",
+        "type": "SqlServerStoredProcedure",
+        "dependsOn": [
+          {
+            "activity": "For each month - Gold",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ],
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 2,
+          "retryIntervalInSeconds": 60,
+          "secureOutput": false,
+          "secureInput": false
+        },
+        "linkedService": {
+          "name": "WH_NYC_Taxi",
+          "properties": {
+            "annotations": [],
+            "type": "DataWarehouse",
+            "typeProperties": {
+              "endpoint": "darotj3cokvunnehuukvqdnj7i-bxedagivo43u7mhoxpakuzsxqm.datawarehouse.fabric.microsoft.com",
+              "artifactId": "8b90142e-bd44-4141-99b9-1e81dc7da692",
+              "workspaceId": "1930c80d-7715-4f37-b0ee-bbc0aa665783"
+            }
+          }
+        },
+        "typeProperties": {
+          "storedProcedureName": "[etl].[usp_build_aggregates]",
+          "storedProcedureParameters": {
+            "run_id": {
+              "value": {
+                "value": "@pipeline().RunId",
+                "type": "Expression"
+              },
+              "type": "String"
+            }
+          }
+        }
+      },
+      {
+        "name": "Maintain statistics",
+        "description": "Creates (once) and refreshes optimiser statistics on the fact join keys",
+        "type": "Script",
+        "dependsOn": [
+          {
+            "activity": "Build aggregates",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ],
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureOutput": false,
+          "secureInput": false
+        },
+        "linkedService": {
+          "name": "WH_NYC_Taxi",
+          "properties": {
+            "annotations": [],
+            "type": "DataWarehouse",
+            "typeProperties": {
+              "endpoint": "darotj3cokvunnehuukvqdnj7i-bxedagivo43u7mhoxpakuzsxqm.datawarehouse.fabric.microsoft.com",
+              "artifactId": "8b90142e-bd44-4141-99b9-1e81dc7da692",
+              "workspaceId": "1930c80d-7715-4f37-b0ee-bbc0aa665783"
+            }
+          }
+        },
+        "typeProperties": {
+          "scripts": [
+            {
+              "type": "NonQuery",
+              "text": "IF NOT EXISTS (SELECT 1 FROM sys.stats WHERE name = 'st_fact_trip_date') CREATE STATISTICS st_fact_trip_date ON fact.fact_trip (date_key);\nUPDATE STATISTICS fact.fact_trip (st_fact_trip_date);\n"
+            },
+            {
+              "type": "NonQuery",
+              "text": "IF NOT EXISTS (SELECT 1 FROM sys.stats WHERE name = 'st_fact_trip_pickup_zone') CREATE STATISTICS st_fact_trip_pickup_zone ON fact.fact_trip (pickup_zone_key);\nUPDATE STATISTICS fact.fact_trip (st_fact_trip_pickup_zone);\n"
+            },
+            {
+              "type": "NonQuery",
+              "text": "IF NOT EXISTS (SELECT 1 FROM sys.stats WHERE name = 'st_fact_trip_dropoff_zone') CREATE STATISTICS st_fact_trip_dropoff_zone ON fact.fact_trip (dropoff_zone_key);\nUPDATE STATISTICS fact.fact_trip (st_fact_trip_dropoff_zone);\n"
+            },
+            {
+              "type": "NonQuery",
+              "text": "IF NOT EXISTS (SELECT 1 FROM sys.stats WHERE name = 'st_fact_trip_month') CREATE STATISTICS st_fact_trip_month ON fact.fact_trip (month_number);\nUPDATE STATISTICS fact.fact_trip (st_fact_trip_month);\n"
+            }
+          ],
+          "scriptBlockExecutionTimeout": "02:00:00"
+        }
+      }
+    ],
+    "annotations": []
+  }
+}

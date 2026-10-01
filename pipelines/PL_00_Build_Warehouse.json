@@ -1,0 +1,259 @@
+{
+  "properties": {
+    "description": "Builds the Gold warehouse from scratch: schemas, control tables, staging, star schema, aggregates and stored procedures. Existing tables are dropped and recreated, so run PL_01 afterwards.",
+    "activities": [
+      {
+        "name": "Create schemas and tables",
+        "description": "32 T-SQL batches",
+        "type": "Script",
+        "dependsOn": [],
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureOutput": false,
+          "secureInput": false
+        },
+        "linkedService": {
+          "name": "WH_NYC_Taxi",
+          "properties": {
+            "annotations": [],
+            "type": "DataWarehouse",
+            "typeProperties": {
+              "endpoint": "darotj3cokvunnehuukvqdnj7i-bxedagivo43u7mhoxpakuzsxqm.datawarehouse.fabric.microsoft.com",
+              "artifactId": "8b90142e-bd44-4141-99b9-1e81dc7da692",
+              "workspaceId": "1930c80d-7715-4f37-b0ee-bbc0aa665783"
+            }
+          }
+        },
+        "typeProperties": {
+          "scripts": [
+            {
+              "type": "NonQuery",
+              "text": "-- =====================================================================\n-- WH_NYC_Taxi · Gold layer · Schemas and tables\n-- Layers: stg (staging fed from Silver) ➜ dim / fact (star schema) ➜ agg (serving aggregates)\n-- etl schema: run log, load control, reconciliation\n-- All statements are idempotent (drop-and-create) so the build can be replayed.\n-- =====================================================================\n\nIF NOT EXISTS (SELECT 1 FROM sys.schemas WHERE name = 'stg')  EXEC('CREATE SCHEMA stg');\n"
+            },
+            {
+              "type": "NonQuery",
+              "text": "IF NOT EXISTS (SELECT 1 FROM sys.schemas WHERE name = 'dim')  EXEC('CREATE SCHEMA dim');\n"
+            },
+            {
+              "type": "NonQuery",
+              "text": "IF NOT EXISTS (SELECT 1 FROM sys.schemas WHERE name = 'fact') EXEC('CREATE SCHEMA fact');\n"
+            },
+            {
+              "type": "NonQuery",
+              "text": "IF NOT EXISTS (SELECT 1 FROM sys.schemas WHERE name = 'agg')  EXEC('CREATE SCHEMA agg');\n"
+            },
+            {
+              "type": "NonQuery",
+              "text": "IF NOT EXISTS (SELECT 1 FROM sys.schemas WHERE name = 'etl')  EXEC('CREATE SCHEMA etl');\n"
+            },
+            {
+              "type": "NonQuery",
+              "text": "-- ---------------------------------------------------------------------\n-- ETL control tables\n-- ---------------------------------------------------------------------\nDROP TABLE IF EXISTS etl.run_log;\nCREATE TABLE etl.run_log (\n    log_id          bigint          NOT NULL,\n    run_id          varchar(64)     NOT NULL,\n    step_name       varchar(100)    NOT NULL,\n    status          varchar(20)     NOT NULL,   -- RUNNING | SUCCEEDED | FAILED\n    started_at      datetime2(3)    NOT NULL,\n    ended_at        datetime2(3)    NULL,\n    rows_affected   bigint          NULL,\n    message         varchar(4000)   NULL\n);\n"
+            },
+            {
+              "type": "NonQuery",
+              "text": "DROP TABLE IF EXISTS etl.load_control;\nCREATE TABLE etl.load_control (\n    year_number     smallint        NOT NULL,\n    month_number    smallint        NOT NULL,\n    silver_rows     bigint          NOT NULL,\n    staged_rows     bigint          NOT NULL,\n    fact_rows       bigint          NOT NULL,\n    is_reconciled   bit             NOT NULL,\n    last_run_id     varchar(64)     NOT NULL,\n    last_loaded_at  datetime2(3)    NOT NULL\n);\n"
+            },
+            {
+              "type": "NonQuery",
+              "text": "-- ---------------------------------------------------------------------\n-- Staging (one month at a time, replaced on each load)\n-- ---------------------------------------------------------------------\nDROP TABLE IF EXISTS stg.stg_yellow_trips;\nCREATE TABLE stg.stg_yellow_trips (\n    trip_sk                 bigint          NOT NULL,\n    vendor_id               int             NULL,\n    pickup_datetime         datetime2(0)    NOT NULL,\n    dropoff_datetime        datetime2(0)    NOT NULL,\n    pickup_date             date            NOT NULL,\n    pickup_hour             smallint        NOT NULL,\n    passenger_count         smallint        NULL,\n    trip_distance           decimal(9,2)    NULL,\n    duration_min            decimal(9,2)    NULL,\n    avg_speed_mph           decimal(9,2)    NULL,\n    rate_code_id            int             NULL,\n    store_and_fwd_flag      varchar(1)      NULL,\n    pickup_location_id      int             NOT NULL,\n    dropoff_location_id     int             NOT NULL,\n    payment_type_id         int             NULL,\n    fare_amount             decimal(10,2)   NULL,\n    extra                   decimal(10,2)   NULL,\n    mta_tax                 decimal(10,2)   NULL,\n    tip_amount              decimal(10,2)   NULL,\n    tip_pct                 decimal(9,2)    NULL,\n    tolls_amount            decimal(10,2)   NULL,\n    improvement_surcharge   decimal(10,2)   NULL,\n    congestion_surcharge    decimal(10,2)   NULL,\n    airport_fee             decimal(10,2)   NULL,\n    cbd_congestion_fee      decimal(10,2)   NULL,\n    total_surcharges        decimal(10,2)   NULL,\n    total_amount            decimal(10,2)   NULL,\n    is_airport_trip         bit             NOT NULL,\n    year_number             smallint        NOT NULL,\n    month_number            smallint        NOT NULL\n);\n"
+            },
+            {
+              "type": "NonQuery",
+              "text": "DROP TABLE IF EXISTS stg.stg_taxi_zones;\nCREATE TABLE stg.stg_taxi_zones (\n    location_id     int             NOT NULL,\n    borough         varchar(50)     NOT NULL,\n    zone_name       varchar(100)    NOT NULL,\n    service_zone    varchar(50)     NOT NULL,\n    is_airport      bit             NOT NULL,\n    latitude        float           NULL,\n    longitude       float           NULL,\n    area_sq_mi      float           NULL\n);\n"
+            },
+            {
+              "type": "NonQuery",
+              "text": "-- ---------------------------------------------------------------------\n-- Dimensions\n-- ---------------------------------------------------------------------\nDROP TABLE IF EXISTS dim.dim_date;\nCREATE TABLE dim.dim_date (\n    date_key        int             NOT NULL,   -- yyyymmdd\n    full_date       date            NOT NULL,\n    year_number     smallint        NOT NULL,\n    quarter_number  smallint        NOT NULL,\n    quarter_label   varchar(7)      NOT NULL,   -- 2025 Q1\n    month_number    smallint        NOT NULL,\n    month_name      varchar(12)     NOT NULL,\n    month_short     varchar(3)      NOT NULL,\n    year_month      varchar(7)      NOT NULL,   -- 2025-01\n    month_label     varchar(8)      NOT NULL,   -- Jan 2025\n    month_start     date            NOT NULL,\n    day_of_month    smallint        NOT NULL,\n    day_of_week     smallint        NOT NULL,   -- 1 = Monday ... 7 = Sunday\n    day_name        varchar(9)      NOT NULL,\n    day_short       varchar(3)      NOT NULL,\n    is_weekend      bit             NOT NULL,\n    week_of_year    smallint        NOT NULL,\n    day_of_year     smallint        NOT NULL,\n    is_holiday      bit             NOT NULL,\n    holiday_name    varchar(40)     NULL,\n    season          varchar(6)      NOT NULL,\n    day_type        varchar(8)      NOT NULL    -- Weekday | Weekend | Holiday\n);\n"
+            },
+            {
+              "type": "NonQuery",
+              "text": "DROP TABLE IF EXISTS dim.dim_hour;\nCREATE TABLE dim.dim_hour (\n    hour_key        smallint        NOT NULL,   -- 0..23\n    hour_label      varchar(5)      NOT NULL,   -- 08:00\n    hour_12         varchar(5)      NOT NULL,   -- 8 AM\n    day_part        varchar(12)     NOT NULL,   -- Night, Morning, Midday, Afternoon, Evening\n    day_part_order  smallint        NOT NULL,\n    is_rush_hour    bit             NOT NULL\n);\n"
+            },
+            {
+              "type": "NonQuery",
+              "text": "DROP TABLE IF EXISTS dim.dim_zone;\nCREATE TABLE dim.dim_zone (\n    zone_key        int             NOT NULL,   -- = TLC LocationID\n    zone_name       varchar(100)    NOT NULL,\n    borough         varchar(50)     NOT NULL,\n    service_zone    varchar(50)     NOT NULL,\n    zone_full_name  varchar(160)    NOT NULL,   -- Zone (Borough)\n    is_airport      bit             NOT NULL,\n    latitude        float           NULL,\n    longitude       float           NULL,\n    area_sq_mi      float           NULL\n);\n"
+            },
+            {
+              "type": "NonQuery",
+              "text": "DROP TABLE IF EXISTS dim.dim_vendor;\nCREATE TABLE dim.dim_vendor (\n    vendor_key      int             NOT NULL,\n    vendor_name     varchar(60)     NOT NULL\n);\n"
+            },
+            {
+              "type": "NonQuery",
+              "text": "DROP TABLE IF EXISTS dim.dim_rate_code;\nCREATE TABLE dim.dim_rate_code (\n    rate_code_key   int             NOT NULL,\n    rate_code_name  varchar(40)     NOT NULL\n);\n"
+            },
+            {
+              "type": "NonQuery",
+              "text": "DROP TABLE IF EXISTS dim.dim_payment_type;\nCREATE TABLE dim.dim_payment_type (\n    payment_type_key    int         NOT NULL,\n    payment_type_name   varchar(30) NOT NULL,\n    is_electronic       bit         NOT NULL\n);\n"
+            },
+            {
+              "type": "NonQuery",
+              "text": "DROP TABLE IF EXISTS dim.dim_distance_band;\nCREATE TABLE dim.dim_distance_band (\n    distance_band_key   smallint    NOT NULL,\n    distance_band       varchar(20) NOT NULL,\n    min_miles           decimal(6,2) NOT NULL,\n    max_miles           decimal(6,2) NOT NULL\n);\n"
+            },
+            {
+              "type": "NonQuery",
+              "text": "-- ---------------------------------------------------------------------\n-- Fact (grain = one taxi trip)\n-- ---------------------------------------------------------------------\nDROP TABLE IF EXISTS fact.fact_trip;\nCREATE TABLE fact.fact_trip (\n    trip_sk                 bigint          NOT NULL,\n    date_key                int             NOT NULL,\n    hour_key                smallint        NOT NULL,\n    pickup_zone_key         int             NOT NULL,\n    dropoff_zone_key        int             NOT NULL,\n    vendor_key              int             NOT NULL,\n    rate_code_key           int             NOT NULL,\n    payment_type_key        int             NOT NULL,\n    distance_band_key       smallint        NOT NULL,\n    pickup_datetime         datetime2(0)    NOT NULL,\n    dropoff_datetime        datetime2(0)    NOT NULL,\n    passenger_count         smallint        NULL,\n    trip_distance           decimal(9,2)    NULL,\n    duration_min            decimal(9,2)    NULL,\n    avg_speed_mph           decimal(9,2)    NULL,\n    fare_amount             decimal(10,2)   NULL,\n    extra                   decimal(10,2)   NULL,\n    mta_tax                 decimal(10,2)   NULL,\n    tip_amount              decimal(10,2)   NULL,\n    tolls_amount            decimal(10,2)   NULL,\n    improvement_surcharge   decimal(10,2)   NULL,\n    congestion_surcharge    decimal(10,2)   NULL,\n    airport_fee             decimal(10,2)   NULL,\n    cbd_congestion_fee      decimal(10,2)   NULL,\n    total_surcharges        decimal(10,2)   NULL,\n    total_amount            decimal(10,2)   NULL,\n    is_airport_trip         bit             NOT NULL,\n    is_tipped               bit             NOT NULL,\n    year_number             smallint        NOT NULL,\n    month_number            smallint        NOT NULL\n);\n"
+            },
+            {
+              "type": "NonQuery",
+              "text": "-- ---------------------------------------------------------------------\n-- Serving aggregates (rebuilt by etl.usp_build_aggregates)\n-- ---------------------------------------------------------------------\nDROP TABLE IF EXISTS agg.monthly_kpi;\nCREATE TABLE agg.monthly_kpi (\n    year_number     smallint        NOT NULL,\n    month_number    smallint        NOT NULL,\n    year_month      varchar(7)      NOT NULL,\n    trips           bigint          NOT NULL,\n    revenue         decimal(14,2)   NOT NULL,\n    fare_revenue    decimal(14,2)   NOT NULL,\n    tips            decimal(14,2)   NOT NULL,\n    surcharges      decimal(14,2)   NOT NULL,\n    tolls           decimal(14,2)   NOT NULL,\n    passengers      bigint          NOT NULL,\n    miles           decimal(14,2)   NOT NULL,\n    minutes         decimal(16,2)   NOT NULL,\n    airport_trips   bigint          NOT NULL,\n    card_trips      bigint          NOT NULL,\n    days_in_month   smallint        NOT NULL,\n    avg_fare        decimal(10,2)   NOT NULL,\n    avg_distance    decimal(9,2)    NOT NULL,\n    avg_duration    decimal(9,2)    NOT NULL,\n    avg_tip_pct     decimal(9,2)    NOT NULL,\n    trips_per_day   decimal(12,1)   NOT NULL\n);\n"
+            },
+            {
+              "type": "NonQuery",
+              "text": "DROP TABLE IF EXISTS agg.daily_borough;\nCREATE TABLE agg.daily_borough (\n    date_key        int             NOT NULL,\n    borough         varchar(50)     NOT NULL,\n    trips           bigint          NOT NULL,\n    revenue         decimal(14,2)   NOT NULL,\n    avg_fare        decimal(10,2)   NOT NULL,\n    avg_duration    decimal(9,2)    NOT NULL\n);\n"
+            },
+            {
+              "type": "NonQuery",
+              "text": "DROP TABLE IF EXISTS agg.hourly_weekday;\nCREATE TABLE agg.hourly_weekday (\n    day_of_week     smallint        NOT NULL,\n    day_short       varchar(3)      NOT NULL,\n    hour_key        smallint        NOT NULL,\n    hour_label      varchar(5)      NOT NULL,\n    trips           bigint          NOT NULL,\n    trips_per_slot  decimal(12,1)   NOT NULL,   -- trips divided by the number of such weekday-hours in the data\n    revenue         decimal(14,2)   NOT NULL,\n    avg_fare        decimal(10,2)   NOT NULL,\n    avg_duration    decimal(9,2)    NOT NULL,\n    avg_speed_mph   decimal(9,2)    NOT NULL\n);\n"
+            },
+            {
+              "type": "NonQuery",
+              "text": "DROP TABLE IF EXISTS agg.zone_flow;\nCREATE TABLE agg.zone_flow (\n    pickup_zone_key     int         NOT NULL,\n    dropoff_zone_key    int         NOT NULL,\n    trips               bigint      NOT NULL,\n    revenue             decimal(14,2) NOT NULL,\n    avg_fare            decimal(10,2) NOT NULL,\n    avg_distance        decimal(9,2)  NOT NULL,\n    avg_duration        decimal(9,2)  NOT NULL,\n    flow_rank           int         NOT NULL\n);\n"
+            },
+            {
+              "type": "NonQuery",
+              "text": "DROP TABLE IF EXISTS agg.zone_monthly;\nCREATE TABLE agg.zone_monthly (\n    zone_key        int             NOT NULL,\n    year_number     smallint        NOT NULL,\n    month_number    smallint        NOT NULL,\n    pickups         bigint          NOT NULL,\n    dropoffs        bigint          NOT NULL,\n    pickup_revenue  decimal(14,2)   NOT NULL,\n    avg_fare        decimal(10,2)   NOT NULL,\n    avg_tip_pct     decimal(9,2)    NOT NULL\n);\n"
+            },
+            {
+              "type": "NonQuery",
+              "text": "DROP TABLE IF EXISTS agg.dq_month;\nCREATE TABLE agg.dq_month (\n    year_number         smallint    NOT NULL,\n    month_number        smallint    NOT NULL,\n    year_month          varchar(7)  NOT NULL,\n    source_file         varchar(80) NOT NULL,\n    rows_read           bigint      NOT NULL,\n    exact_duplicates    bigint      NOT NULL,\n    rows_valid          bigint      NOT NULL,\n    rows_rejected       bigint      NOT NULL,\n    reject_pct          decimal(9,4) NOT NULL,\n    silver_duration_s   int         NOT NULL,\n    processed_at        datetime2(0) NOT NULL,\n    run_id              varchar(64) NOT NULL\n);\n"
+            },
+            {
+              "type": "NonQuery",
+              "text": "DROP TABLE IF EXISTS agg.dq_rule_month;\nCREATE TABLE agg.dq_rule_month (\n    year_number     smallint        NOT NULL,\n    month_number    smallint        NOT NULL,\n    year_month      varchar(7)      NOT NULL,\n    rule_name       varchar(60)     NOT NULL,\n    rule_label      varchar(60)     NOT NULL,\n    rejected_rows   bigint          NOT NULL\n);\n"
+            },
+            {
+              "type": "NonQuery",
+              "text": "-- ---------------------------------------------------------------------\n-- Primary keys (informational, NOT ENFORCED, for the optimiser and for modelling tools).\n-- Fabric Warehouse accepts them only through ALTER TABLE, never inline in CREATE TABLE.\n-- ---------------------------------------------------------------------\nALTER TABLE dim.dim_date          ADD CONSTRAINT pk_dim_date          PRIMARY KEY NONCLUSTERED (date_key)          NOT ENFORCED;\n"
+            },
+            {
+              "type": "NonQuery",
+              "text": "ALTER TABLE dim.dim_hour          ADD CONSTRAINT pk_dim_hour          PRIMARY KEY NONCLUSTERED (hour_key)          NOT ENFORCED;\n"
+            },
+            {
+              "type": "NonQuery",
+              "text": "ALTER TABLE dim.dim_zone          ADD CONSTRAINT pk_dim_zone          PRIMARY KEY NONCLUSTERED (zone_key)          NOT ENFORCED;\n"
+            },
+            {
+              "type": "NonQuery",
+              "text": "ALTER TABLE dim.dim_vendor        ADD CONSTRAINT pk_dim_vendor        PRIMARY KEY NONCLUSTERED (vendor_key)        NOT ENFORCED;\n"
+            },
+            {
+              "type": "NonQuery",
+              "text": "ALTER TABLE dim.dim_rate_code     ADD CONSTRAINT pk_dim_rate_code     PRIMARY KEY NONCLUSTERED (rate_code_key)     NOT ENFORCED;\n"
+            },
+            {
+              "type": "NonQuery",
+              "text": "ALTER TABLE dim.dim_payment_type  ADD CONSTRAINT pk_dim_payment_type  PRIMARY KEY NONCLUSTERED (payment_type_key)  NOT ENFORCED;\n"
+            },
+            {
+              "type": "NonQuery",
+              "text": "ALTER TABLE dim.dim_distance_band ADD CONSTRAINT pk_dim_distance_band PRIMARY KEY NONCLUSTERED (distance_band_key) NOT ENFORCED;\n"
+            },
+            {
+              "type": "NonQuery",
+              "text": "ALTER TABLE fact.fact_trip        ADD CONSTRAINT pk_fact_trip         PRIMARY KEY NONCLUSTERED (trip_sk)           NOT ENFORCED;\n"
+            }
+          ],
+          "scriptBlockExecutionTimeout": "02:00:00"
+        }
+      },
+      {
+        "name": "Create stored procedures",
+        "description": "14 T-SQL batches",
+        "type": "Script",
+        "dependsOn": [
+          {
+            "activity": "Create schemas and tables",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ],
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureOutput": false,
+          "secureInput": false
+        },
+        "linkedService": {
+          "name": "WH_NYC_Taxi",
+          "properties": {
+            "annotations": [],
+            "type": "DataWarehouse",
+            "typeProperties": {
+              "endpoint": "darotj3cokvunnehuukvqdnj7i-bxedagivo43u7mhoxpakuzsxqm.datawarehouse.fabric.microsoft.com",
+              "artifactId": "8b90142e-bd44-4141-99b9-1e81dc7da692",
+              "workspaceId": "1930c80d-7715-4f37-b0ee-bbc0aa665783"
+            }
+          }
+        },
+        "typeProperties": {
+          "scripts": [
+            {
+              "type": "NonQuery",
+              "text": "-- =====================================================================\n-- WH_NYC_Taxi · Gold layer · Stored procedures\n--   etl.usp_log_step          : structured run log\n--   etl.usp_load_dimensions   : date, hour, zone, vendor, rate code, payment type, distance band\n--   etl.usp_load_month        : Silver ➜ staging ➜ fact for one month, with reconciliation\n--   etl.usp_build_aggregates  : serving aggregates and data quality snapshots\n--   etl.usp_run_full          : orchestrates every month found in Silver for a year\n-- =====================================================================\n\nIF OBJECT_ID('etl.usp_log_step', 'P') IS NOT NULL DROP PROCEDURE etl.usp_log_step;\n"
+            },
+            {
+              "type": "NonQuery",
+              "text": "CREATE PROCEDURE etl.usp_log_step\n    @run_id        varchar(64),\n    @step_name     varchar(100),\n    @status        varchar(20),\n    @rows_affected bigint = NULL,\n    @message       varchar(4000) = NULL\nAS\nBEGIN\n    SET NOCOUNT ON;\n    DECLARE @now datetime2(3) = SYSUTCDATETIME();\n    IF @status = 'RUNNING'\n        INSERT INTO etl.run_log (log_id, run_id, step_name, status, started_at, ended_at, rows_affected, message)\n        SELECT ISNULL(MAX(log_id), 0) + 1, @run_id, @step_name, @status, @now, NULL, NULL, @message FROM etl.run_log;\n    ELSE\n    BEGIN\n        -- close the open RUNNING row of this step if any, otherwise write a standalone row\n        UPDATE etl.run_log\n           SET status = @status, ended_at = @now, rows_affected = @rows_affected, message = @message\n         WHERE run_id = @run_id AND step_name = @step_name AND status = 'RUNNING';\n        IF @@ROWCOUNT = 0\n            INSERT INTO etl.run_log (log_id, run_id, step_name, status, started_at, ended_at, rows_affected, message)\n            SELECT ISNULL(MAX(log_id), 0) + 1, @run_id, @step_name, @status, @now, @now, @rows_affected, @message FROM etl.run_log;\n    END\nEND\n"
+            },
+            {
+              "type": "NonQuery",
+              "text": "-- ---------------------------------------------------------------------\nIF OBJECT_ID('etl.usp_load_dimensions', 'P') IS NOT NULL DROP PROCEDURE etl.usp_load_dimensions;\n"
+            },
+            {
+              "type": "NonQuery",
+              "text": "CREATE PROCEDURE etl.usp_load_dimensions\n    @run_id varchar(64) = 'manual'\nAS\nBEGIN\n    SET NOCOUNT ON;\n    EXEC etl.usp_log_step @run_id, 'load_dimensions', 'RUNNING';\n    BEGIN TRY\n        -- ---------------- dim_date: 2024-01-01 .. 2026-12-31 with US federal holidays ----------------\n        TRUNCATE TABLE dim.dim_date;\n        ;WITH n0 AS (SELECT 0 AS n UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4\n                     UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9),\n        nums AS (SELECT a.n + 10*b.n + 100*c.n + 1000*d.n AS n FROM n0 a CROSS JOIN n0 b CROSS JOIN n0 c CROSS JOIN n0 d),\n        days AS (SELECT DATEADD(day, n, CAST('2024-01-01' AS date)) AS d FROM nums WHERE n <= DATEDIFF(day, '2024-01-01', '2026-12-31')),\n        hol AS (SELECT CAST(h AS date) AS h, nm FROM (VALUES\n            ('2024-01-01','New Year''s Day'),('2024-01-15','Martin Luther King Jr. Day'),('2024-02-19','Presidents'' Day'),\n            ('2024-05-27','Memorial Day'),('2024-06-19','Juneteenth'),('2024-07-04','Independence Day'),('2024-09-02','Labor Day'),\n            ('2024-10-14','Columbus Day'),('2024-11-11','Veterans Day'),('2024-11-28','Thanksgiving Day'),('2024-12-25','Christmas Day'),\n            ('2025-01-01','New Year''s Day'),('2025-01-20','Martin Luther King Jr. Day'),('2025-02-17','Presidents'' Day'),\n            ('2025-05-26','Memorial Day'),('2025-06-19','Juneteenth'),('2025-07-04','Independence Day'),('2025-09-01','Labor Day'),\n            ('2025-10-13','Columbus Day'),('2025-11-11','Veterans Day'),('2025-11-27','Thanksgiving Day'),('2025-12-25','Christmas Day'),\n            ('2026-01-01','New Year''s Day'),('2026-01-19','Martin Luther King Jr. Day'),('2026-02-16','Presidents'' Day'),\n            ('2026-05-25','Memorial Day'),('2026-06-19','Juneteenth'),('2026-07-03','Independence Day (observed)'),('2026-09-07','Labor Day'),\n            ('2026-10-12','Columbus Day'),('2026-11-11','Veterans Day'),('2026-11-26','Thanksgiving Day'),('2026-12-25','Christmas Day')) v(h, nm))\n        INSERT INTO dim.dim_date (date_key, full_date, year_number, quarter_number, quarter_label, month_number, month_name, month_short,\n                                  year_month, month_label, month_start, day_of_month, day_of_week, day_name, day_short, is_weekend,\n                                  week_of_year, day_of_year, is_holiday, holiday_name, season, day_type)\n        SELECT  YEAR(d) * 10000 + MONTH(d) * 100 + DAY(d),\n                d, YEAR(d), DATEPART(quarter, d),\n                CAST(YEAR(d) AS varchar(4)) + ' Q' + CAST(DATEPART(quarter, d) AS varchar(1)),\n                MONTH(d), DATENAME(month, d), LEFT(DATENAME(month, d), 3),\n                CAST(YEAR(d) AS varchar(4)) + '-' + RIGHT('0' + CAST(MONTH(d) AS varchar(2)), 2),\n                LEFT(DATENAME(month, d), 3) + ' ' + CAST(YEAR(d) AS varchar(4)),\n                DATEFROMPARTS(YEAR(d), MONTH(d), 1),\n                DAY(d),\n                (DATEDIFF(day, '2024-01-01', d) % 7) + 1,\n                DATENAME(weekday, d), LEFT(DATENAME(weekday, d), 3),\n                CASE WHEN (DATEDIFF(day, '2024-01-01', d) % 7) + 1 >= 6 THEN 1 ELSE 0 END,\n                DATEPART(iso_week, d), DATEPART(dayofyear, d),\n                CASE WHEN hol.h IS NULL THEN 0 ELSE 1 END, hol.nm,\n                CASE WHEN MONTH(d) IN (12, 1, 2) THEN 'Winter' WHEN MONTH(d) IN (3, 4, 5) THEN 'Spring'\n                     WHEN MONTH(d) IN (6, 7, 8) THEN 'Summer' ELSE 'Autumn' END,\n                CASE WHEN hol.h IS NOT NULL THEN 'Holiday'\n                     WHEN (DATEDIFF(day, '2024-01-01', d) % 7) + 1 >= 6 THEN 'Weekend' ELSE 'Weekday' END\n        FROM days LEFT JOIN hol ON hol.h = days.d;\n\n        -- ---------------- dim_hour ----------------\n        TRUNCATE TABLE dim.dim_hour;\n        ;WITH h AS (SELECT 0 AS n UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5\n                    UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9 UNION ALL SELECT 10 UNION ALL SELECT 11\n                    UNION ALL SELECT 12 UNION ALL SELECT 13 UNION ALL SELECT 14 UNION ALL SELECT 15 UNION ALL SELECT 16 UNION ALL SELECT 17\n                    UNION ALL SELECT 18 UNION ALL SELECT 19 UNION ALL SELECT 20 UNION ALL SELECT 21 UNION ALL SELECT 22 UNION ALL SELECT 23)\n        INSERT INTO dim.dim_hour (hour_key, hour_label, hour_12, day_part, day_part_order, is_rush_hour)\n        SELECT n, RIGHT('0' + CAST(n AS varchar(2)), 2) + ':00',\n               CASE WHEN n = 0 THEN '12 AM' WHEN n < 12 THEN CAST(n AS varchar(2)) + ' AM' WHEN n = 12 THEN '12 PM' ELSE CAST(n - 12 AS varchar(2)) + ' PM' END,\n               CASE WHEN n < 6 THEN 'Night' WHEN n < 10 THEN 'Morning' WHEN n < 14 THEN 'Midday' WHEN n < 18 THEN 'Afternoon' WHEN n < 22 THEN 'Evening' ELSE 'Late night' END,\n               CASE WHEN n < 6 THEN 1 WHEN n < 10 THEN 2 WHEN n < 14 THEN 3 WHEN n < 18 THEN 4 WHEN n < 22 THEN 5 ELSE 6 END,\n               CASE WHEN n IN (7, 8, 9, 16, 17, 18) THEN 1 ELSE 0 END\n        FROM h;\n\n        -- ---------------- reference dimensions (TLC data dictionary, yellow trips, 2025 edition) ----------------\n        TRUNCATE TABLE dim.dim_vendor;\n        INSERT INTO dim.dim_vendor (vendor_key, vendor_name) VALUES\n            (1, 'Creative Mobile Technologies'), (2, 'Curb Mobility'), (6, 'Myle Technologies'), (7, 'Helix'), (-1, 'Unknown');\n\n        TRUNCATE TABLE dim.dim_rate_code;\n        INSERT INTO dim.dim_rate_code (rate_code_key, rate_code_name) VALUES\n            (1, 'Standard rate'), (2, 'JFK'), (3, 'Newark'), (4, 'Nassau or Westchester'), (5, 'Negotiated fare'), (6, 'Group ride'), (99, 'Unknown');\n\n        TRUNCATE TABLE dim.dim_payment_type;\n        INSERT INTO dim.dim_payment_type (payment_type_key, payment_type_name, is_electronic) VALUES\n            (0, 'Flex fare', 1), (1, 'Credit card', 1), (2, 'Cash', 0), (3, 'No charge', 0), (4, 'Dispute', 0), (5, 'Unknown', 0), (6, 'Voided trip', 0);\n\n        TRUNCATE TABLE dim.dim_distance_band;\n        INSERT INTO dim.dim_distance_band (distance_band_key, distance_band, min_miles, max_miles) VALUES\n            (1, '0 to 1 mi', 0, 1), (2, '1 to 2 mi', 1, 2), (3, '2 to 3 mi', 2, 3), (4, '3 to 5 mi', 3, 5),\n            (5, '5 to 10 mi', 5, 10), (6, '10 to 20 mi', 10, 20), (7, 'Over 20 mi', 20, 999);\n\n        -- ---------------- dim_zone from Silver (cross-database read of the lakehouse SQL endpoint) ----------------\n        TRUNCATE TABLE stg.stg_taxi_zones;\n        INSERT INTO stg.stg_taxi_zones (location_id, borough, zone_name, service_zone, is_airport, latitude, longitude, area_sq_mi)\n        SELECT location_id, borough, zone, service_zone, CAST(is_airport AS bit), latitude, longitude, area_sq_mi\n        FROM [LH_Silver].[dbo].[silver_taxi_zones];\n\n        TRUNCATE TABLE dim.dim_zone;\n        INSERT INTO dim.dim_zone (zone_key, zone_name, borough, service_zone, zone_full_name, is_airport, latitude, longitude, area_sq_mi)\n        SELECT location_id, zone_name, borough, service_zone, zone_name + ' (' + borough + ')', is_airport, latitude, longitude, area_sq_mi\n        FROM stg.stg_taxi_zones;\n        IF NOT EXISTS (SELECT 1 FROM dim.dim_zone WHERE zone_key = 0)\n            INSERT INTO dim.dim_zone (zone_key, zone_name, borough, service_zone, zone_full_name, is_airport, latitude, longitude, area_sq_mi)\n            VALUES (0, 'Unmapped', 'Unknown', 'N/A', 'Unmapped (Unknown)', 0, NULL, NULL, NULL);\n\n        DECLARE @n bigint = (SELECT COUNT(*) FROM dim.dim_date) + (SELECT COUNT(*) FROM dim.dim_zone);\n        EXEC etl.usp_log_step @run_id, 'load_dimensions', 'SUCCEEDED', @n, 'dim_date, dim_hour, dim_zone, dim_vendor, dim_rate_code, dim_payment_type, dim_distance_band';\n    END TRY\n    BEGIN CATCH\n        DECLARE @err varchar(4000) = ERROR_MESSAGE();\n        EXEC etl.usp_log_step @run_id, 'load_dimensions', 'FAILED', NULL, @err;\n        THROW;\n    END CATCH\nEND\n"
+            },
+            {
+              "type": "NonQuery",
+              "text": "-- ---------------------------------------------------------------------\nIF OBJECT_ID('etl.usp_load_month', 'P') IS NOT NULL DROP PROCEDURE etl.usp_load_month;\n"
+            },
+            {
+              "type": "NonQuery",
+              "text": "CREATE PROCEDURE etl.usp_load_month\n    @year   smallint,\n    @month  smallint,\n    @run_id varchar(64) = 'manual'\nAS\nBEGIN\n    SET NOCOUNT ON;\n    DECLARE @step varchar(100) = 'load_month_' + CAST(@year AS varchar(4)) + '_' + RIGHT('0' + CAST(@month AS varchar(2)), 2);\n    DECLARE @silver_rows bigint, @staged_rows bigint, @fact_rows bigint, @msg varchar(4000);\n    EXEC etl.usp_log_step @run_id, @step, 'RUNNING';\n    BEGIN TRY\n        SELECT @silver_rows = COUNT_BIG(*) FROM [LH_Silver].[dbo].[silver_yellow_trips] WHERE [year] = @year AND [month] = @month;\n        IF @silver_rows = 0\n        BEGIN\n            SET @msg = 'No Silver rows for ' + CAST(@year AS varchar(4)) + '-' + CAST(@month AS varchar(2));\n            THROW 50010, @msg, 1;\n        END\n\n        -- ---------------- staging: replace the month ----------------\n        DELETE FROM stg.stg_yellow_trips WHERE year_number = @year AND month_number = @month;\n        INSERT INTO stg.stg_yellow_trips (trip_sk, vendor_id, pickup_datetime, dropoff_datetime, pickup_date, pickup_hour, passenger_count,\n            trip_distance, duration_min, avg_speed_mph, rate_code_id, store_and_fwd_flag, pickup_location_id, dropoff_location_id,\n            payment_type_id, fare_amount, extra, mta_tax, tip_amount, tip_pct, tolls_amount, improvement_surcharge, congestion_surcharge,\n            airport_fee, cbd_congestion_fee, total_surcharges, total_amount, is_airport_trip, year_number, month_number)\n        SELECT trip_sk, vendor_id, CAST(pickup_datetime AS datetime2(0)), CAST(dropoff_datetime AS datetime2(0)), pickup_date,\n               CAST(pickup_hour AS smallint), CAST(passenger_count AS smallint),\n               CAST(trip_distance AS decimal(9,2)), CAST(duration_min AS decimal(9,2)), CAST(avg_speed_mph AS decimal(9,2)),\n               rate_code_id, LEFT(store_and_fwd_flag, 1), pickup_location_id, dropoff_location_id, payment_type_id,\n               CAST(fare_amount AS decimal(10,2)), CAST(extra AS decimal(10,2)), CAST(mta_tax AS decimal(10,2)), CAST(tip_amount AS decimal(10,2)),\n               CAST(tip_pct AS decimal(9,2)), CAST(tolls_amount AS decimal(10,2)), CAST(improvement_surcharge AS decimal(10,2)),\n               CAST(congestion_surcharge AS decimal(10,2)), CAST(airport_fee AS decimal(10,2)), CAST(cbd_congestion_fee AS decimal(10,2)),\n               CAST(total_surcharges AS decimal(10,2)), CAST(total_amount AS decimal(10,2)), CAST(is_airport_trip AS bit),\n               CAST([year] AS smallint), CAST([month] AS smallint)\n        FROM [LH_Silver].[dbo].[silver_yellow_trips]\n        WHERE [year] = @year AND [month] = @month;\n        SELECT @staged_rows = COUNT_BIG(*) FROM stg.stg_yellow_trips WHERE year_number = @year AND month_number = @month;\n\n        -- ---------------- fact: replace the month (transactional) ----------------\n        BEGIN TRANSACTION;\n        DELETE FROM fact.fact_trip WHERE year_number = @year AND month_number = @month;\n        INSERT INTO fact.fact_trip (trip_sk, date_key, hour_key, pickup_zone_key, dropoff_zone_key, vendor_key, rate_code_key, payment_type_key,\n            distance_band_key, pickup_datetime, dropoff_datetime, passenger_count, trip_distance, duration_min, avg_speed_mph, fare_amount,\n            extra, mta_tax, tip_amount, tolls_amount, improvement_surcharge, congestion_surcharge, airport_fee, cbd_congestion_fee,\n            total_surcharges, total_amount, is_airport_trip, is_tipped, year_number, month_number)\n        SELECT  s.trip_sk,\n                YEAR(s.pickup_date) * 10000 + MONTH(s.pickup_date) * 100 + DAY(s.pickup_date),\n                s.pickup_hour,\n                CASE WHEN pz.zone_key IS NULL THEN 0 ELSE s.pickup_location_id END,\n                CASE WHEN dz.zone_key IS NULL THEN 0 ELSE s.dropoff_location_id END,\n                CASE WHEN v.vendor_key IS NULL THEN -1 ELSE s.vendor_id END,\n                CASE WHEN rc.rate_code_key IS NULL THEN 99 ELSE s.rate_code_id END,\n                CASE WHEN pt.payment_type_key IS NULL THEN 5 ELSE s.payment_type_id END,\n                CASE WHEN s.trip_distance < 1 THEN 1 WHEN s.trip_distance < 2 THEN 2 WHEN s.trip_distance < 3 THEN 3 WHEN s.trip_distance < 5 THEN 4\n                     WHEN s.trip_distance < 10 THEN 5 WHEN s.trip_distance < 20 THEN 6 ELSE 7 END,\n                s.pickup_datetime, s.dropoff_datetime, s.passenger_count, s.trip_distance, s.duration_min, s.avg_speed_mph, s.fare_amount,\n                s.extra, s.mta_tax, s.tip_amount, s.tolls_amount, s.improvement_surcharge, s.congestion_surcharge, s.airport_fee, s.cbd_congestion_fee,\n                s.total_surcharges, s.total_amount, s.is_airport_trip,\n                CASE WHEN s.tip_amount > 0 THEN 1 ELSE 0 END,\n                s.year_number, s.month_number\n        FROM stg.stg_yellow_trips s\n        LEFT JOIN dim.dim_zone pz         ON pz.zone_key = s.pickup_location_id\n        LEFT JOIN dim.dim_zone dz         ON dz.zone_key = s.dropoff_location_id\n        LEFT JOIN dim.dim_vendor v        ON v.vendor_key = s.vendor_id\n        LEFT JOIN dim.dim_rate_code rc    ON rc.rate_code_key = s.rate_code_id\n        LEFT JOIN dim.dim_payment_type pt ON pt.payment_type_key = s.payment_type_id\n        WHERE s.year_number = @year AND s.month_number = @month;\n        COMMIT TRANSACTION;\n\n        SELECT @fact_rows = COUNT_BIG(*) FROM fact.fact_trip WHERE year_number = @year AND month_number = @month;\n\n        -- ---------------- reconciliation and control ----------------\n        DELETE FROM etl.load_control WHERE year_number = @year AND month_number = @month;\n        INSERT INTO etl.load_control (year_number, month_number, silver_rows, staged_rows, fact_rows, is_reconciled, last_run_id, last_loaded_at)\n        VALUES (@year, @month, @silver_rows, @staged_rows, @fact_rows,\n                CASE WHEN @silver_rows = @staged_rows AND @staged_rows = @fact_rows THEN 1 ELSE 0 END, @run_id, SYSUTCDATETIME());\n\n        IF NOT (@silver_rows = @staged_rows AND @staged_rows = @fact_rows)\n        BEGIN\n            SET @msg = 'Reconciliation failed: silver=' + CAST(@silver_rows AS varchar(20)) + ' staged=' + CAST(@staged_rows AS varchar(20)) + ' fact=' + CAST(@fact_rows AS varchar(20));\n            THROW 50020, @msg, 1;\n        END\n\n        SET @msg = 'silver=' + CAST(@silver_rows AS varchar(20)) + ' staged=' + CAST(@staged_rows AS varchar(20)) + ' fact=' + CAST(@fact_rows AS varchar(20)) + ' reconciled';\n        EXEC etl.usp_log_step @run_id, @step, 'SUCCEEDED', @fact_rows, @msg;\n    END TRY\n    BEGIN CATCH\n        IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;\n        DECLARE @err varchar(4000) = ERROR_MESSAGE();\n        EXEC etl.usp_log_step @run_id, @step, 'FAILED', NULL, @err;\n        THROW;\n    END CATCH\nEND\n"
+            },
+            {
+              "type": "NonQuery",
+              "text": "-- ---------------------------------------------------------------------\nIF OBJECT_ID('etl.usp_build_aggregates', 'P') IS NOT NULL DROP PROCEDURE etl.usp_build_aggregates;\n"
+            },
+            {
+              "type": "NonQuery",
+              "text": "CREATE PROCEDURE etl.usp_build_aggregates\n    @run_id varchar(64) = 'manual'\nAS\nBEGIN\n    SET NOCOUNT ON;\n    EXEC etl.usp_log_step @run_id, 'build_aggregates', 'RUNNING';\n    BEGIN TRY\n        -- ---------------- monthly KPIs ----------------\n        TRUNCATE TABLE agg.monthly_kpi;\n        INSERT INTO agg.monthly_kpi (year_number, month_number, year_month, trips, revenue, fare_revenue, tips, surcharges, tolls, passengers,\n                                     miles, minutes, airport_trips, card_trips, days_in_month, avg_fare, avg_distance, avg_duration, avg_tip_pct, trips_per_day)\n        SELECT  f.year_number, f.month_number,\n                CAST(f.year_number AS varchar(4)) + '-' + RIGHT('0' + CAST(f.month_number AS varchar(2)), 2),\n                COUNT_BIG(*), SUM(f.total_amount), SUM(f.fare_amount), SUM(f.tip_amount), SUM(f.total_surcharges), SUM(f.tolls_amount),\n                SUM(CAST(ISNULL(f.passenger_count, 1) AS bigint)), SUM(f.trip_distance), SUM(f.duration_min),\n                SUM(CAST(f.is_airport_trip AS int)), SUM(CASE WHEN f.payment_type_key = 1 THEN 1 ELSE 0 END),\n                COUNT(DISTINCT f.date_key),\n                AVG(f.fare_amount), AVG(f.trip_distance), AVG(f.duration_min),\n                ISNULL(100.0 * SUM(CASE WHEN f.payment_type_key = 1 THEN f.tip_amount ELSE 0 END) / NULLIF(SUM(CASE WHEN f.payment_type_key = 1 THEN f.fare_amount ELSE 0 END), 0), 0),\n                ISNULL(CAST(COUNT_BIG(*) AS decimal(14,1)) / NULLIF(COUNT(DISTINCT f.date_key), 0), 0)\n        FROM fact.fact_trip f\n        GROUP BY f.year_number, f.month_number;\n\n        -- ---------------- daily by borough ----------------\n        TRUNCATE TABLE agg.daily_borough;\n        INSERT INTO agg.daily_borough (date_key, borough, trips, revenue, avg_fare, avg_duration)\n        SELECT f.date_key, z.borough, COUNT_BIG(*), SUM(f.total_amount), AVG(f.fare_amount), AVG(f.duration_min)\n        FROM fact.fact_trip f JOIN dim.dim_zone z ON z.zone_key = f.pickup_zone_key\n        GROUP BY f.date_key, z.borough;\n\n        -- ---------------- weekday x hour demand profile ----------------\n        TRUNCATE TABLE agg.hourly_weekday;\n        ;WITH slots AS (\n            SELECT d.day_of_week, COUNT(*) AS n_days\n            FROM dim.dim_date d\n            WHERE d.date_key BETWEEN (SELECT MIN(date_key) FROM fact.fact_trip) AND (SELECT MAX(date_key) FROM fact.fact_trip)\n            GROUP BY d.day_of_week)\n        INSERT INTO agg.hourly_weekday (day_of_week, day_short, hour_key, hour_label, trips, trips_per_slot, revenue, avg_fare, avg_duration, avg_speed_mph)\n        SELECT d.day_of_week, MIN(d.day_short), f.hour_key, MIN(h.hour_label), COUNT_BIG(*),\n               ISNULL(CAST(COUNT_BIG(*) AS decimal(14,1)) / NULLIF(MIN(s.n_days), 0), 0),\n               SUM(f.total_amount), AVG(f.fare_amount), AVG(f.duration_min), ISNULL(AVG(f.avg_speed_mph), 0)\n        FROM fact.fact_trip f\n        JOIN dim.dim_date d ON d.date_key = f.date_key\n        JOIN dim.dim_hour h ON h.hour_key = f.hour_key\n        JOIN slots s ON s.day_of_week = d.day_of_week\n        GROUP BY d.day_of_week, f.hour_key;\n\n        -- ---------------- zone to zone flows (ranked) ----------------\n        TRUNCATE TABLE agg.zone_flow;\n        INSERT INTO agg.zone_flow (pickup_zone_key, dropoff_zone_key, trips, revenue, avg_fare, avg_distance, avg_duration, flow_rank)\n        SELECT pickup_zone_key, dropoff_zone_key, trips, revenue, avg_fare, avg_distance, avg_duration,\n               ROW_NUMBER() OVER (ORDER BY trips DESC)\n        FROM (SELECT f.pickup_zone_key, f.dropoff_zone_key, COUNT_BIG(*) AS trips, SUM(f.total_amount) AS revenue,\n                     AVG(f.fare_amount) AS avg_fare, AVG(f.trip_distance) AS avg_distance, AVG(f.duration_min) AS avg_duration\n              FROM fact.fact_trip f\n              WHERE f.pickup_zone_key > 0 AND f.dropoff_zone_key > 0\n              GROUP BY f.pickup_zone_key, f.dropoff_zone_key) x;\n\n        -- ---------------- zone monthly (pickups and dropoffs) ----------------\n        TRUNCATE TABLE agg.zone_monthly;\n        INSERT INTO agg.zone_monthly (zone_key, year_number, month_number, pickups, dropoffs, pickup_revenue, avg_fare, avg_tip_pct)\n        SELECT z.zone_key, z.year_number, z.month_number,\n               SUM(z.pickups), SUM(z.dropoffs), SUM(z.pickup_revenue),\n               ISNULL(SUM(z.pickup_revenue) / NULLIF(SUM(z.pickups), 0), 0),   -- dropoff-only zones have no pickups\n               ISNULL(100.0 * SUM(z.card_tips) / NULLIF(SUM(z.card_fares), 0), 0)\n        FROM (\n            SELECT pickup_zone_key AS zone_key, year_number, month_number, COUNT_BIG(*) AS pickups, CAST(0 AS bigint) AS dropoffs,\n                   SUM(total_amount) AS pickup_revenue,\n                   SUM(CASE WHEN payment_type_key = 1 THEN tip_amount ELSE 0 END) AS card_tips,\n                   SUM(CASE WHEN payment_type_key = 1 THEN fare_amount ELSE 0 END) AS card_fares\n            FROM fact.fact_trip GROUP BY pickup_zone_key, year_number, month_number\n            UNION ALL\n            SELECT dropoff_zone_key, year_number, month_number, 0, COUNT_BIG(*), 0, 0, 0\n            FROM fact.fact_trip GROUP BY dropoff_zone_key, year_number, month_number) z\n        GROUP BY z.zone_key, z.year_number, z.month_number;\n\n        -- ---------------- data quality snapshots from Silver (latest run per month) ----------------\n        TRUNCATE TABLE agg.dq_month;\n        INSERT INTO agg.dq_month (year_number, month_number, year_month, source_file, rows_read, exact_duplicates, rows_valid, rows_rejected,\n                                  reject_pct, silver_duration_s, processed_at, run_id)\n        SELECT [year], [month], CAST([year] AS varchar(4)) + '-' + RIGHT('0' + CAST([month] AS varchar(2)), 2), source_file, rows_read, exact_duplicates,\n               rows_valid, rows_rejected, CAST(reject_pct AS decimal(9,4)), duration_s, CAST(processed_at AS datetime2(0)), run_id\n        FROM (SELECT *, ROW_NUMBER() OVER (PARTITION BY [year], [month] ORDER BY processed_at DESC) AS rn\n              FROM [LH_Silver].[dbo].[silver_dq_log]) q\n        WHERE rn = 1;\n\n        TRUNCATE TABLE agg.dq_rule_month;\n        INSERT INTO agg.dq_rule_month (year_number, month_number, year_month, rule_name, rule_label, rejected_rows)\n        SELECT r.[year], r.[month], m.year_month, r.[rule],\n               CASE r.[rule] WHEN 'outside_file_month' THEN 'Pickup outside file month' WHEN 'missing_timestamp' THEN 'Missing timestamp'\n                           WHEN 'invalid_duration' THEN 'Negative or over 24 h duration' WHEN 'zero_length_trip' THEN 'Zero distance and under 1 min'\n                           WHEN 'invalid_distance' THEN 'Negative or over 200 mi' WHEN 'negative_amount' THEN 'Negative fare, tip or total'\n                           WHEN 'implausible_fare' THEN 'Fare or total over $1,000' WHEN 'implausible_speed' THEN 'Speed over 100 mph'\n                           WHEN 'missing_location' THEN 'Missing pickup or dropoff zone' WHEN 'invalid_passengers' THEN 'More than 9 passengers'\n                           ELSE r.[rule] END,\n               r.rejected_rows\n        FROM [LH_Silver].[dbo].[silver_dq_rule_log] r\n        JOIN agg.dq_month m ON m.year_number = r.[year] AND m.month_number = r.[month] AND m.run_id = r.run_id\n        WHERE r.[rule] <> 'none';\n\n        DECLARE @n bigint = (SELECT COUNT_BIG(*) FROM agg.zone_flow) + (SELECT COUNT_BIG(*) FROM agg.daily_borough) + (SELECT COUNT_BIG(*) FROM agg.zone_monthly);\n        EXEC etl.usp_log_step @run_id, 'build_aggregates', 'SUCCEEDED', @n, 'monthly_kpi, daily_borough, hourly_weekday, zone_flow, zone_monthly, dq_month, dq_rule_month';\n    END TRY\n    BEGIN CATCH\n        DECLARE @err varchar(4000) = ERROR_MESSAGE();\n        EXEC etl.usp_log_step @run_id, 'build_aggregates', 'FAILED', NULL, @err;\n        THROW;\n    END CATCH\nEND\n"
+            },
+            {
+              "type": "NonQuery",
+              "text": "-- ---------------------------------------------------------------------\nIF OBJECT_ID('etl.usp_run_full', 'P') IS NOT NULL DROP PROCEDURE etl.usp_run_full;\n"
+            },
+            {
+              "type": "NonQuery",
+              "text": "CREATE PROCEDURE etl.usp_run_full\n    @year   smallint,\n    @run_id varchar(64) = 'manual'\nAS\nBEGIN\n    SET NOCOUNT ON;\n    EXEC etl.usp_load_dimensions @run_id;\n    DECLARE @m smallint = 1;\n    WHILE @m <= 12\n    BEGIN\n        IF EXISTS (SELECT 1 FROM [LH_Silver].[dbo].[silver_yellow_trips] WHERE [year] = @year AND [month] = @m)\n            EXEC etl.usp_load_month @year, @m, @run_id;\n        SET @m = @m + 1;\n    END\n    EXEC etl.usp_build_aggregates @run_id;\nEND\n"
+            },
+            {
+              "type": "NonQuery",
+              "text": "-- ---------------------------------------------------------------------\n-- Statistics on the join keys of the fact table (query optimiser hints)\n-- ---------------------------------------------------------------------\nIF NOT EXISTS (SELECT 1 FROM sys.stats WHERE name = 'st_fact_trip_date') CREATE STATISTICS st_fact_trip_date ON fact.fact_trip (date_key);\n"
+            },
+            {
+              "type": "NonQuery",
+              "text": "IF NOT EXISTS (SELECT 1 FROM sys.stats WHERE name = 'st_fact_trip_pickup_zone') CREATE STATISTICS st_fact_trip_pickup_zone ON fact.fact_trip (pickup_zone_key);\n"
+            },
+            {
+              "type": "NonQuery",
+              "text": "IF NOT EXISTS (SELECT 1 FROM sys.stats WHERE name = 'st_fact_trip_dropoff_zone') CREATE STATISTICS st_fact_trip_dropoff_zone ON fact.fact_trip (dropoff_zone_key);\n"
+            },
+            {
+              "type": "NonQuery",
+              "text": "IF NOT EXISTS (SELECT 1 FROM sys.stats WHERE name = 'st_fact_trip_month') CREATE STATISTICS st_fact_trip_month ON fact.fact_trip (month_number);\n"
+            }
+          ],
+          "scriptBlockExecutionTimeout": "02:00:00"
+        }
+      }
+    ],
+    "annotations": []
+  }
+}
