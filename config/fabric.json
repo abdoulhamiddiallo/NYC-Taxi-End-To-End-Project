@@ -1,0 +1,14 @@
+{
+  "_comment": "Fabric workspace and item ids used by the generators. Replace them to deploy into another workspace (see docs/runbook.md).",
+  "workspace_id": "1930c80d-7715-4f37-b0ee-bbc0aa665783",
+  "warehouse_id": "8b90142e-bd44-4141-99b9-1e81dc7da692",
+  "warehouse_sql_endpoint": "darotj3cokvunnehuukvqdnj7i-bxedagivo43u7mhoxpakuzsxqm.datawarehouse.fabric.microsoft.com",
+  "bronze_lakehouse_id": "466a7632-1fdf-4b83-884d-f8b09624affc",
+  "silver_lakehouse_id": "3f32a7f0-2ffa-4d40-9259-2858d1a630b9",
+  "silver_sql_endpoint_id": "3a3fcb3d-165c-4685-a32b-7ca36bc46812",
+  "notebooks": {
+    "NB_01_Ingest_Bronze": "d3188947-c1da-425a-9f22-08e2f47da996",
+    "NB_02_Bronze_To_Silver": "43eb3207-fb22-45d7-845f-ea6c6468934c",
+    "NB_03_Deploy_Report": "a86545dd-a7d4-4aea-9904-744c7ad1e2f6"
+  }
+}
