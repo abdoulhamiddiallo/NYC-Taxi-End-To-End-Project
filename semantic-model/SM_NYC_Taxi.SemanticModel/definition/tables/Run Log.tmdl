@@ -1,0 +1,53 @@
+table 'Run Log'
+
+	column log_id
+		dataType: int64
+		isHidden
+		summarizeBy: none
+		sourceColumn: log_id
+
+	column Run
+		dataType: string
+		summarizeBy: none
+		sourceColumn: run_id
+
+	column Step
+		dataType: string
+		summarizeBy: none
+		sourceColumn: step_name
+
+	column Status
+		dataType: string
+		summarizeBy: none
+		sourceColumn: status
+
+	column Started
+		dataType: dateTime
+		formatString: d MMM HH:mm:ss
+		summarizeBy: none
+		sourceColumn: started_at
+
+	column Ended
+		dataType: dateTime
+		formatString: d MMM HH:mm:ss
+		summarizeBy: none
+		sourceColumn: ended_at
+
+	column 'Rows Affected'
+		dataType: int64
+		formatString: #,0
+		summarizeBy: sum
+		sourceColumn: rows_affected
+
+	column Message
+		dataType: string
+		summarizeBy: none
+		sourceColumn: message
+
+	partition 'Run Log' = entity
+		mode: directLake
+		source
+			entityName: run_log
+			schemaName: etl
+			expressionSource: DatabaseQuery
+

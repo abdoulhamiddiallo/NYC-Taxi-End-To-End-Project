@@ -1,0 +1,45 @@
+table 'Data Quality Rules'
+
+	column 'Rule Year'
+		dataType: int64
+		isHidden
+		formatString: #,0
+		summarizeBy: none
+		sourceColumn: year_number
+
+	column 'Rule Month Number'
+		dataType: int64
+		isHidden
+		formatString: #,0
+		summarizeBy: none
+		sourceColumn: month_number
+
+	column 'Rule Month'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: year_month
+
+	column Rule
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: rule_name
+
+	column 'Rule Label'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: rule_label
+
+	column 'Rule Rejected Rows'
+		dataType: int64
+		formatString: #,0
+		summarizeBy: sum
+		sourceColumn: rejected_rows
+
+	partition 'Data Quality Rules' = entity
+		mode: directLake
+		source
+			entityName: dq_rule_month
+			schemaName: agg
+			expressionSource: DatabaseQuery
+

@@ -1,0 +1,765 @@
+table Trips
+	isHidden
+
+	/// Number of valid yellow taxi trips
+	measure 'Trips' =
+			COUNTROWS ( Trips )
+		formatString: #,0
+		displayFolder: Core
+
+	/// Total amount charged to passengers, including fare, tips, tolls and surcharges
+	measure 'Revenue' =
+			SUM ( Trips[total_amount] )
+		formatString: $#,0
+		displayFolder: Core
+
+	measure 'Fare Revenue' =
+			SUM ( Trips[fare_amount] )
+		formatString: $#,0
+		displayFolder: Core
+
+	measure 'Tips' =
+			SUM ( Trips[tip_amount] )
+		formatString: $#,0
+		displayFolder: Core
+
+	measure 'Tolls' =
+			SUM ( Trips[tolls_amount] )
+		formatString: $#,0
+		displayFolder: Core
+
+	measure 'Surcharges' =
+			SUM ( Trips[total_surcharges] )
+		formatString: $#,0
+		displayFolder: Core
+
+	measure 'Congestion Surcharge' =
+			SUM ( Trips[congestion_surcharge] )
+		formatString: $#,0
+		displayFolder: Fees
+
+	/// Manhattan congestion relief zone fee, in force since 5 January 2025
+	measure 'CBD Congestion Fee' =
+			SUM ( Trips[cbd_congestion_fee] )
+		formatString: $#,0
+		displayFolder: Fees
+
+	measure 'Airport Fee' =
+			SUM ( Trips[airport_fee] )
+		formatString: $#,0
+		displayFolder: Fees
+
+	measure 'MTA Tax' =
+			SUM ( Trips[mta_tax] )
+		formatString: $#,0
+		displayFolder: Fees
+
+	measure 'Improvement Surcharge' =
+			SUM ( Trips[improvement_surcharge] )
+		formatString: $#,0
+		displayFolder: Fees
+
+	measure 'Extras' =
+			SUM ( Trips[extra] )
+		formatString: $#,0
+		displayFolder: Fees
+
+	measure 'Passengers' =
+			SUM ( Trips[passenger_count] )
+		formatString: #,0
+		displayFolder: Core
+
+	measure 'Miles' =
+			SUM ( Trips[trip_distance] )
+		formatString: #,0
+		displayFolder: Core
+
+	measure 'Minutes' =
+			SUM ( Trips[duration_min] )
+		formatString: #,0
+		displayFolder: Core
+
+	measure 'Hours on Meter' =
+			[Minutes] / 60
+		formatString: #,0
+		displayFolder: Core
+
+	measure 'Avg Fare' =
+			AVERAGE ( Trips[fare_amount] )
+		formatString: $#,0.00
+		displayFolder: Averages
+
+	measure 'Avg Total' =
+			AVERAGE ( Trips[total_amount] )
+		formatString: $#,0.00
+		displayFolder: Averages
+
+	measure 'Avg Tip' =
+			AVERAGE ( Trips[tip_amount] )
+		formatString: $#,0.00
+		displayFolder: Averages
+
+	/// Average trip distance in miles
+	measure 'Avg Distance' =
+			AVERAGE ( Trips[trip_distance] )
+		formatString: #,0.00
+		displayFolder: Averages
+
+	/// Average trip duration in minutes
+	measure 'Avg Duration' =
+			AVERAGE ( Trips[duration_min] )
+		formatString: #,0.0
+		displayFolder: Averages
+
+	/// Average trip speed in mph
+	measure 'Avg Speed' =
+			AVERAGE ( Trips[avg_speed_mph] )
+		formatString: #,0.0
+		displayFolder: Averages
+
+	measure 'Avg Passengers' =
+			AVERAGE ( Trips[passenger_count] )
+		formatString: #,0.00
+		displayFolder: Averages
+
+	measure 'Revenue per Mile' =
+			DIVIDE ( [Revenue], [Miles] )
+		formatString: $#,0.00
+		displayFolder: Averages
+
+	measure 'Revenue per Minute' =
+			DIVIDE ( [Revenue], [Minutes] )
+		formatString: $#,0.00
+		displayFolder: Averages
+
+	measure 'Revenue per Trip' =
+			DIVIDE ( [Revenue], [Trips] )
+		formatString: $#,0.00
+		displayFolder: Averages
+
+	measure 'Card Trips' =
+			CALCULATE ( [Trips], Trips[payment_type_key] = 1 )
+		formatString: #,0
+		displayFolder: Payments
+
+	measure 'Cash Trips' =
+			CALCULATE ( [Trips], Trips[payment_type_key] = 2 )
+		formatString: #,0
+		displayFolder: Payments
+
+	measure 'Card Share' =
+			DIVIDE ( [Card Trips], [Trips] )
+		formatString: 0.0%
+		displayFolder: Payments
+
+	measure 'Cash Share' =
+			DIVIDE ( [Cash Trips], [Trips] )
+		formatString: 0.0%
+		displayFolder: Payments
+
+	measure 'Card Tips' =
+			CALCULATE ( SUM ( Trips[tip_amount] ), Trips[payment_type_key] = 1 )
+		formatString: $#,0
+		displayFolder: Payments
+
+	measure 'Card Fares' =
+			CALCULATE ( SUM ( Trips[fare_amount] ), Trips[payment_type_key] = 1 )
+		formatString: $#,0
+		displayFolder: Payments
+
+	/// Tips as a share of fares on card payments (cash tips are not recorded)
+	measure 'Tip Rate' =
+			DIVIDE ( [Card Tips], [Card Fares] )
+		formatString: 0.0%
+		displayFolder: Payments
+
+	measure 'Tipped Trips' =
+			CALCULATE ( [Trips], Trips[is_tipped] = TRUE () )
+		formatString: #,0
+		displayFolder: Payments
+
+	/// Share of card trips with a tip
+	measure 'Tipped Share' =
+			DIVIDE ( [Tipped Trips], [Card Trips] )
+		formatString: 0.0%
+		displayFolder: Payments
+
+	measure 'Airport Trips' =
+			CALCULATE ( [Trips], Trips[is_airport_trip] = TRUE () )
+		formatString: #,0
+		displayFolder: Airports
+
+	measure 'Airport Share' =
+			DIVIDE ( [Airport Trips], [Trips] )
+		formatString: 0.0%
+		displayFolder: Airports
+
+	measure 'Airport Revenue' =
+			CALCULATE ( [Revenue], Trips[is_airport_trip] = TRUE () )
+		formatString: $#,0
+		displayFolder: Airports
+
+	measure 'Days' =
+			CALCULATE ( DISTINCTCOUNT ( Trips[date_key] ) )
+		formatString: #,0
+		displayFolder: Time
+
+	measure 'Trips per Day' =
+			DIVIDE ( [Trips], [Days] )
+		formatString: #,0
+		displayFolder: Time
+
+	measure 'Revenue per Day' =
+			DIVIDE ( [Revenue], [Days] )
+		formatString: $#,0
+		displayFolder: Time
+
+	measure 'Trips per Hour of Day' =
+			DIVIDE ( [Trips], [Days] * 24 )
+		formatString: #,0
+		displayFolder: Time
+
+	/// Trips in the previous month
+	measure 'Trips PM' =
+			CALCULATE ( [Trips], DATEADD ( 'Date'[Date], -1, MONTH ) )
+		formatString: #,0
+		displayFolder: Time
+
+	measure 'Trips MoM' =
+			VAR pm = [Trips PM] RETURN IF ( pm > 0, DIVIDE ( [Trips] - pm, pm ) )
+		formatString: +0.0%;-0.0%;0.0%
+		displayFolder: Time
+
+	measure 'Revenue PM' =
+			CALCULATE ( [Revenue], DATEADD ( 'Date'[Date], -1, MONTH ) )
+		formatString: $#,0
+		displayFolder: Time
+
+	measure 'Revenue MoM' =
+			VAR pm = [Revenue PM] RETURN IF ( pm > 0, DIVIDE ( [Revenue] - pm, pm ) )
+		formatString: +0.0%;-0.0%;0.0%
+		displayFolder: Time
+
+	measure 'Avg Fare PM' =
+			CALCULATE ( [Avg Fare], DATEADD ( 'Date'[Date], -1, MONTH ) )
+		formatString: $#,0.00
+		displayFolder: Time
+
+	measure 'Avg Fare MoM' =
+			VAR pm = [Avg Fare PM] RETURN IF ( pm > 0, DIVIDE ( [Avg Fare] - pm, pm ) )
+		formatString: +0.0%;-0.0%;0.0%
+		displayFolder: Time
+
+	measure 'Trips YTD' =
+			CALCULATE ( [Trips], DATESYTD ( 'Date'[Date] ) )
+		formatString: #,0
+		displayFolder: Time
+
+	measure 'Revenue YTD' =
+			CALCULATE ( [Revenue], DATESYTD ( 'Date'[Date] ) )
+		formatString: $#,0
+		displayFolder: Time
+
+	measure 'Weekend Trips' =
+			CALCULATE ( [Trips], 'Date'[Is Weekend] = TRUE () )
+		formatString: #,0
+		displayFolder: Time
+
+	measure 'Weekend Share' =
+			DIVIDE ( [Weekend Trips], [Trips] )
+		formatString: 0.0%
+		displayFolder: Time
+
+	measure 'Rush Hour Trips' =
+			CALCULATE ( [Trips], 'Hour'[Is Rush Hour] = TRUE () )
+		formatString: #,0
+		displayFolder: Time
+
+	measure 'Rush Hour Share' =
+			DIVIDE ( [Rush Hour Trips], [Trips] )
+		formatString: 0.0%
+		displayFolder: Time
+
+	/// Share of trips against all zones, hours, payments and vendors in the selected period
+	measure 'Trips Share' =
+			DIVIDE ( [Trips], CALCULATE ( [Trips], REMOVEFILTERS ( 'Pickup Zone' ), REMOVEFILTERS ( 'Dropoff Zone' ), REMOVEFILTERS ( 'Payment Type' ), REMOVEFILTERS ( 'Distance Band' ), REMOVEFILTERS ( 'Hour' ), REMOVEFILTERS ( 'Vendor' ), REMOVEFILTERS ( 'Rate Code' ) ) )
+		formatString: 0.0%
+		displayFolder: Shares
+
+	measure 'Revenue Share' =
+			DIVIDE ( [Revenue], CALCULATE ( [Revenue], REMOVEFILTERS ( 'Pickup Zone' ), REMOVEFILTERS ( 'Dropoff Zone' ), REMOVEFILTERS ( 'Payment Type' ), REMOVEFILTERS ( 'Distance Band' ), REMOVEFILTERS ( 'Hour' ), REMOVEFILTERS ( 'Vendor' ), REMOVEFILTERS ( 'Rate Code' ) ) )
+		formatString: 0.0%
+		displayFolder: Shares
+
+	measure 'Pickup Zone Rank' =
+			IF ( HASONEVALUE ( 'Pickup Zone'[Pickup Zone] ), RANKX ( ALL ( 'Pickup Zone'[Pickup Zone] ), [Trips], , DESC, DENSE ) )
+		formatString: 0
+		displayFolder: Shares
+
+	measure 'Dropoff Zone Rank' =
+			IF ( HASONEVALUE ( 'Dropoff Zone'[Dropoff Zone] ), RANKX ( ALL ( 'Dropoff Zone'[Dropoff Zone] ), [Trips], , DESC, DENSE ) )
+		formatString: 0
+		displayFolder: Shares
+
+	/// Hour of day with the most pickups
+	measure 'Peak Hour' =
+			VAR t = TOPN ( 1, ALLSELECTED ( 'Hour'[Hour] ), [Trips], DESC ) RETURN MAXX ( t, 'Hour'[Hour] )
+		displayFolder: Labels
+
+	measure 'Busiest Day' =
+			VAR t = TOPN ( 1, ALLSELECTED ( 'Date'[Day Name] ), [Trips], DESC ) RETURN MAXX ( t, 'Date'[Day Name] )
+		displayFolder: Labels
+
+	measure 'Top Pickup Zone' =
+			VAR t = TOPN ( 1, ALLSELECTED ( 'Pickup Zone'[Pickup Zone] ), [Trips], DESC ) RETURN MAXX ( t, 'Pickup Zone'[Pickup Zone] )
+		displayFolder: Labels
+
+	measure 'Top Dropoff Zone' =
+			VAR t = TOPN ( 1, ALLSELECTED ( 'Dropoff Zone'[Dropoff Zone] ), [Trips], DESC ) RETURN MAXX ( t, 'Dropoff Zone'[Dropoff Zone] )
+		displayFolder: Labels
+
+	measure 'Top Borough' =
+			VAR t = TOPN ( 1, ALLSELECTED ( 'Pickup Zone'[Pickup Borough] ), [Trips], DESC ) RETURN MAXX ( t, 'Pickup Zone'[Pickup Borough] )
+		displayFolder: Labels
+
+	measure 'Period Label' =
+			VAR d1 = MIN ( 'Date'[Date] ) VAR d2 = MAX ( 'Date'[Date] ) RETURN IF ( ISBLANK ( d1 ), "", FORMAT ( d1, "d MMM yyyy" ) & "  to  " & FORMAT ( d2, "d MMM yyyy" ) )
+		displayFolder: Labels
+
+	measure 'Trips Label' =
+			FORMAT ( [Trips], "#,0" ) & " trips"
+		displayFolder: Labels
+
+	measure 'Trips per Day Label' =
+			FORMAT ( [Trips per Day], "#,0" ) & " trips per day"
+		displayFolder: Labels
+
+	measure 'Revenue per Day Label' =
+			FORMAT ( [Revenue per Day], "$#,0" ) & " per day"
+		displayFolder: Labels
+
+	measure 'Avg Distance Label' =
+			FORMAT ( [Avg Distance], "0.0" ) & " mi  ·  " & FORMAT ( [Avg Speed], "0.0" ) & " mph"
+		displayFolder: Labels
+
+	measure 'Avg Duration Label' =
+			FORMAT ( [Avg Duration], "0.0" ) & " min per trip"
+		displayFolder: Labels
+
+	measure 'Tip Rate Label' =
+			FORMAT ( [Tipped Share], "0%" ) & " of card trips tip"
+		displayFolder: Labels
+
+	measure 'Card Share Label' =
+			FORMAT ( [Card Share], "0%" ) & " by card"
+		displayFolder: Labels
+
+	measure 'Airport Label' =
+			FORMAT ( [Airport Share], "0.0%" ) & " of trips"
+		displayFolder: Labels
+
+	measure 'Trips MoM Label' =
+			VAR v = [Trips MoM] RETURN IF ( ISBLANK ( v ), "first month", FORMAT ( v, "+0.0%;-0.0%;0.0%" ) & " vs previous month" )
+		displayFolder: Labels
+
+	/// Month over month change when one month is selected, revenue per day otherwise
+	measure 'Revenue MoM Label' =
+			VAR v = [Revenue MoM] RETURN IF ( NOT HASONEVALUE ( 'Date'[Year Month] ), [Revenue per Day Label], IF ( ISBLANK ( v ), "first month of the data", FORMAT ( v, "+0.0%;-0.0%;0.0%" ) & " vs previous month" ) )
+		displayFolder: Labels
+
+	/// Month over month change when one month is selected, average total paid otherwise
+	measure 'Avg Fare MoM Label' =
+			VAR v = [Avg Fare MoM] RETURN IF ( NOT HASONEVALUE ( 'Date'[Year Month] ), FORMAT ( [Avg Total], "$0.00" ) & " paid in total per trip", IF ( ISBLANK ( v ), "first month of the data", FORMAT ( v, "+0.0%;-0.0%;0.0%" ) & " vs previous month" ) )
+		displayFolder: Labels
+
+	measure 'Fare and Tip Label' =
+			FORMAT ( [Avg Fare], "$0.00" ) & " fare  ·  " & FORMAT ( [Avg Tip], "$0.00" ) & " tip"
+		displayFolder: Labels
+
+	measure 'Miles Label' =
+			FORMAT ( [Miles] / 1000000, "0.0" ) & "M miles on the meter"
+		displayFolder: Labels
+
+	measure 'Hours Label' =
+			FORMAT ( [Hours on Meter] / 1000000, "0.0" ) & "M hours on the meter"
+		displayFolder: Labels
+
+	measure 'Cash Share Label' =
+			FORMAT ( [Cash Share], "0.0%" ) & " paid in cash"
+		displayFolder: Labels
+
+	measure 'CBD Fee per Trip Label' =
+			FORMAT ( DIVIDE ( [CBD Congestion Fee], [Trips] ), "$0.00" ) & " per trip on average"
+		displayFolder: Labels
+
+	measure 'Airport Revenue Label' =
+			FORMAT ( DIVIDE ( [Airport Revenue], [Revenue] ), "0.0%" ) & " of revenue"
+		displayFolder: Labels
+
+	measure 'Top Pickup Zone Label' =
+			VAR t = TOPN ( 1, ALLSELECTED ( 'Pickup Zone'[Pickup Zone] ), [Trips], DESC ) RETURN FORMAT ( MAXX ( t, [Trips] ), "#,0" ) & " pickups"
+		displayFolder: Labels
+
+	measure 'Top Dropoff Zone Label' =
+			VAR t = TOPN ( 1, ALLSELECTED ( 'Dropoff Zone'[Dropoff Zone] ), [Trips], DESC ) RETURN FORMAT ( MAXX ( t, [Trips] ), "#,0" ) & " dropoffs"
+		displayFolder: Labels
+
+	measure 'Top Borough Label' =
+			VAR t = TOPN ( 1, ALLSELECTED ( 'Pickup Zone'[Pickup Borough] ), [Trips], DESC ) RETURN FORMAT ( DIVIDE ( MAXX ( t, [Trips] ), [Trips] ), "0.0%" ) & " of pickups"
+		displayFolder: Labels
+
+	measure 'Peak Hour Label' =
+			VAR t = TOPN ( 1, ALLSELECTED ( 'Hour'[Hour] ), [Trips], DESC ) RETURN FORMAT ( MAXX ( t, [Trips per Day] ), "#,0" ) & " pickups per day"
+		displayFolder: Labels
+
+	measure 'Busiest Day Label' =
+			VAR t = TOPN ( 1, ALLSELECTED ( 'Date'[Day Name] ), [Trips], DESC ) RETURN FORMAT ( MAXX ( t, [Trips per Day] ), "#,0" ) & " trips per day"
+		displayFolder: Labels
+
+	measure 'Rush Hour Label' =
+			"7 to 10 am and 4 to 7 pm"
+		displayFolder: Labels
+
+	measure 'Weekend Trips Label' =
+			FORMAT ( [Weekend Trips], "#,0" ) & " weekend trips"
+		displayFolder: Labels
+
+	measure 'Files Label' =
+			FORMAT ( [DQ Months], "0" ) & " monthly Parquet files"
+		displayFolder: Quality
+
+	measure 'Accepted Label' =
+			FORMAT ( DIVIDE ( [DQ Rows Valid], [DQ Rows Read] ), "0.0%" ) & " of the rows read"
+		displayFolder: Quality
+
+	measure 'Quarantine Label' =
+			"kept with their failed rules"
+		displayFolder: Quality
+
+	measure 'Top Rule Label' =
+			VAR t = TOPN ( 1, ALL ( 'Data Quality Rules'[Rule Label] ), [DQ Rule Rows], DESC ) RETURN "Top: " & MAXX ( t, 'Data Quality Rules'[Rule Label] )
+		displayFolder: Quality
+
+	measure 'Duplicates Label' =
+			"dropped before the rules run"
+		displayFolder: Quality
+
+	/// 1 for the most recent run log step, 2 for the one before, and so on
+	measure 'Step Recency' =
+			VAR cur = MAX ( 'Run Log'[Started] ) RETURN IF ( NOT ISBLANK ( cur ), COUNTROWS ( FILTER ( ALL ( 'Run Log'[Started] ), 'Run Log'[Started] >= cur ) ) )
+		formatString: 0
+		displayFolder: Quality
+
+	measure 'DQ Rows Read' =
+			SUM ( 'Data Quality'[Rows Read] )
+		formatString: #,0
+		displayFolder: Quality
+
+	measure 'DQ Rows Valid' =
+			SUM ( 'Data Quality'[Rows Valid] )
+		formatString: #,0
+		displayFolder: Quality
+
+	measure 'DQ Rows Rejected' =
+			SUM ( 'Data Quality'[Rows Rejected] )
+		formatString: #,0
+		displayFolder: Quality
+
+	measure 'DQ Duplicates' =
+			SUM ( 'Data Quality'[Exact Duplicates] )
+		formatString: #,0
+		displayFolder: Quality
+
+	measure 'DQ Reject Rate' =
+			DIVIDE ( [DQ Rows Rejected], [DQ Rows Valid] + [DQ Rows Rejected] )
+		formatString: 0.00%
+		displayFolder: Quality
+
+	measure 'DQ Months' =
+			DISTINCTCOUNT ( 'Data Quality'[DQ Month] )
+		formatString: 0
+		displayFolder: Quality
+
+	measure 'DQ Rule Rows' =
+			SUM ( 'Data Quality Rules'[Rule Rejected Rows] )
+		formatString: #,0
+		displayFolder: Quality
+
+	measure 'DQ Rule Share' =
+			DIVIDE ( [DQ Rule Rows], CALCULATE ( [DQ Rule Rows], REMOVEFILTERS ( 'Data Quality Rules'[Rule Label] ) ) )
+		formatString: 0.0%
+		displayFolder: Quality
+
+	measure 'Silver Minutes' =
+			DIVIDE ( SUM ( 'Data Quality'[Silver Seconds] ), 60 )
+		formatString: #,0.0
+		displayFolder: Quality
+
+	measure 'Months Loaded' =
+			COUNTROWS ( 'Load Control' )
+		formatString: 0
+		displayFolder: Quality
+
+	measure 'Months Reconciled' =
+			CALCULATE ( COUNTROWS ( 'Load Control' ), 'Load Control'[Is Reconciled] = TRUE () )
+		formatString: 0
+		displayFolder: Quality
+
+	measure 'Reconciliation Label' =
+			FORMAT ( [Months Reconciled], "0" ) & " of " & FORMAT ( [Months Loaded], "0" ) & " months reconciled"
+		displayFolder: Quality
+
+	measure 'Fact Rows Loaded' =
+			SUM ( 'Load Control'[Fact Rows] )
+		formatString: #,0
+		displayFolder: Quality
+
+	measure 'Run Steps' =
+			COUNTROWS ( 'Run Log' )
+		formatString: #,0
+		displayFolder: Quality
+
+	measure 'Failed Steps' =
+			CALCULATE ( COUNTROWS ( 'Run Log' ), 'Run Log'[Status] = "FAILED" )
+		formatString: #,0
+		displayFolder: Quality
+
+	measure 'Step Seconds' =
+			SUMX ( 'Run Log', DATEDIFF ( 'Run Log'[Started], 'Run Log'[Ended], SECOND ) )
+		formatString: #,0
+		displayFolder: Quality
+
+	measure 'Last Load' =
+			MAX ( 'Load Control'[Loaded At] )
+		formatString: d MMM yyyy HH:mm
+		displayFolder: Quality
+
+	measure 'Profile Trips' =
+			SUM ( 'Demand Profile'[Slot Trips] )
+		formatString: #,0
+		displayFolder: Profile
+
+	/// Average pickups in one weekday hour slot across the year
+	measure 'Profile Trips per Slot' =
+			SUM ( 'Demand Profile'[Trips per Slot] )
+		formatString: #,0
+		displayFolder: Profile
+
+	measure 'Profile Avg Speed' =
+			AVERAGE ( 'Demand Profile'[Slot Avg Speed] )
+		formatString: #,0.0
+		displayFolder: Profile
+
+	measure 'Profile Avg Fare' =
+			AVERAGE ( 'Demand Profile'[Slot Avg Fare] )
+		formatString: $#,0.00
+		displayFolder: Profile
+
+	measure 'Flow Trips Total' =
+			SUM ( 'Zone Flow'[Flow Trips] )
+		formatString: #,0
+		displayFolder: Flows
+
+	measure 'Flow Revenue Total' =
+			SUM ( 'Zone Flow'[Flow Revenue] )
+		formatString: $#,0
+		displayFolder: Flows
+
+	column trip_sk
+		dataType: int64
+		isHidden
+		summarizeBy: none
+		sourceColumn: trip_sk
+
+	column date_key
+		dataType: int64
+		isHidden
+		formatString: #,0
+		summarizeBy: none
+		sourceColumn: date_key
+
+	column hour_key
+		dataType: int64
+		isHidden
+		formatString: #,0
+		summarizeBy: none
+		sourceColumn: hour_key
+
+	column pickup_zone_key
+		dataType: int64
+		isHidden
+		formatString: #,0
+		summarizeBy: none
+		sourceColumn: pickup_zone_key
+
+	column dropoff_zone_key
+		dataType: int64
+		isHidden
+		formatString: #,0
+		summarizeBy: none
+		sourceColumn: dropoff_zone_key
+
+	column vendor_key
+		dataType: int64
+		isHidden
+		formatString: #,0
+		summarizeBy: none
+		sourceColumn: vendor_key
+
+	column rate_code_key
+		dataType: int64
+		isHidden
+		formatString: #,0
+		summarizeBy: none
+		sourceColumn: rate_code_key
+
+	column payment_type_key
+		dataType: int64
+		isHidden
+		formatString: #,0
+		summarizeBy: none
+		sourceColumn: payment_type_key
+
+	column distance_band_key
+		dataType: int64
+		isHidden
+		formatString: #,0
+		summarizeBy: none
+		sourceColumn: distance_band_key
+
+	column pickup_datetime
+		dataType: dateTime
+		isHidden
+		summarizeBy: none
+		sourceColumn: pickup_datetime
+
+	column dropoff_datetime
+		dataType: dateTime
+		isHidden
+		summarizeBy: none
+		sourceColumn: dropoff_datetime
+
+	column passenger_count
+		dataType: int64
+		isHidden
+		formatString: #,0
+		summarizeBy: none
+		sourceColumn: passenger_count
+
+	column trip_distance
+		dataType: decimal
+		isHidden
+		summarizeBy: none
+		sourceColumn: trip_distance
+
+	column duration_min
+		dataType: decimal
+		isHidden
+		summarizeBy: none
+		sourceColumn: duration_min
+
+	column avg_speed_mph
+		dataType: decimal
+		isHidden
+		summarizeBy: none
+		sourceColumn: avg_speed_mph
+
+	column fare_amount
+		dataType: decimal
+		isHidden
+		summarizeBy: none
+		sourceColumn: fare_amount
+
+	column extra
+		dataType: decimal
+		isHidden
+		summarizeBy: none
+		sourceColumn: extra
+
+	column mta_tax
+		dataType: decimal
+		isHidden
+		summarizeBy: none
+		sourceColumn: mta_tax
+
+	column tip_amount
+		dataType: decimal
+		isHidden
+		summarizeBy: none
+		sourceColumn: tip_amount
+
+	column tolls_amount
+		dataType: decimal
+		isHidden
+		summarizeBy: none
+		sourceColumn: tolls_amount
+
+	column improvement_surcharge
+		dataType: decimal
+		isHidden
+		summarizeBy: none
+		sourceColumn: improvement_surcharge
+
+	column congestion_surcharge
+		dataType: decimal
+		isHidden
+		summarizeBy: none
+		sourceColumn: congestion_surcharge
+
+	column airport_fee
+		dataType: decimal
+		isHidden
+		summarizeBy: none
+		sourceColumn: airport_fee
+
+	column cbd_congestion_fee
+		dataType: decimal
+		isHidden
+		summarizeBy: none
+		sourceColumn: cbd_congestion_fee
+
+	column total_surcharges
+		dataType: decimal
+		isHidden
+		summarizeBy: none
+		sourceColumn: total_surcharges
+
+	column total_amount
+		dataType: decimal
+		isHidden
+		summarizeBy: none
+		sourceColumn: total_amount
+
+	column is_airport_trip
+		dataType: boolean
+		isHidden
+		summarizeBy: none
+		sourceColumn: is_airport_trip
+
+	column is_tipped
+		dataType: boolean
+		isHidden
+		summarizeBy: none
+		sourceColumn: is_tipped
+
+	column year_number
+		dataType: int64
+		isHidden
+		formatString: #,0
+		summarizeBy: none
+		sourceColumn: year_number
+
+	column month_number
+		dataType: int64
+		isHidden
+		formatString: #,0
+		summarizeBy: none
+		sourceColumn: month_number
+
+	partition Trips = entity
+		mode: directLake
+		source
+			entityName: fact_trip
+			schemaName: fact
+			expressionSource: DatabaseQuery
+

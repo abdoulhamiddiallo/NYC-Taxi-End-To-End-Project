@@ -1,0 +1,159 @@
+table Date
+	dataCategory: Time
+
+	column date_key
+		dataType: int64
+		isHidden
+		summarizeBy: none
+		sourceColumn: date_key
+
+	/// Calendar date of pickup
+	column Date
+		dataType: dateTime
+		isKey
+		formatString: d MMM yyyy
+		summarizeBy: none
+		sourceColumn: full_date
+
+	column Year
+		dataType: int64
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: year_number
+
+	column Quarter
+		dataType: string
+		summarizeBy: none
+		sourceColumn: quarter_label
+
+	column 'Quarter Number'
+		dataType: int64
+		isHidden
+		formatString: #,0
+		summarizeBy: none
+		sourceColumn: quarter_number
+
+	column 'Month Number'
+		dataType: int64
+		isHidden
+		formatString: #,0
+		summarizeBy: none
+		sourceColumn: month_number
+
+	column Month
+		dataType: string
+		sortByColumn: 'Month Number'
+		summarizeBy: none
+		sourceColumn: month_name
+
+	column Mon
+		dataType: string
+		sortByColumn: 'Month Number'
+		summarizeBy: none
+		sourceColumn: month_short
+
+	column 'Year Month'
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: year_month
+
+	/// Jan 2025 style label
+	column 'Month Label'
+		dataType: string
+		sortByColumn: 'Year Month'
+		summarizeBy: none
+		sourceColumn: month_label
+
+	column 'Month Start'
+		dataType: dateTime
+		isHidden
+		formatString: d MMM yyyy
+		summarizeBy: none
+		sourceColumn: month_start
+
+	column Day
+		dataType: int64
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: day_of_month
+
+	column 'Day of Week'
+		dataType: int64
+		isHidden
+		formatString: #,0
+		summarizeBy: none
+		sourceColumn: day_of_week
+
+	column 'Day Name'
+		dataType: string
+		sortByColumn: 'Day of Week'
+		summarizeBy: none
+		sourceColumn: day_name
+
+	column 'Day Short'
+		dataType: string
+		sortByColumn: 'Day of Week'
+		summarizeBy: none
+		sourceColumn: day_short
+
+	column 'Is Weekend'
+		dataType: boolean
+		summarizeBy: none
+		sourceColumn: is_weekend
+
+	column Week
+		dataType: int64
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: week_of_year
+
+	column 'Day of Year'
+		dataType: int64
+		isHidden
+		formatString: #,0
+		summarizeBy: none
+		sourceColumn: day_of_year
+
+	column 'Is Holiday'
+		dataType: boolean
+		summarizeBy: none
+		sourceColumn: is_holiday
+
+	column Holiday
+		dataType: string
+		summarizeBy: none
+		sourceColumn: holiday_name
+
+	column Season
+		dataType: string
+		summarizeBy: none
+		sourceColumn: season
+
+	/// Weekday, Weekend or Holiday
+	column 'Day Type'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: day_type
+
+	hierarchy Calendar
+
+		level Year
+			column: Year
+
+		level Quarter
+			column: Quarter
+
+		level Month
+			column: Month
+
+		level Date
+			column: Date
+
+	partition Date = entity
+		mode: directLake
+		source
+			entityName: dim_date
+			schemaName: dim
+			expressionSource: DatabaseQuery
+

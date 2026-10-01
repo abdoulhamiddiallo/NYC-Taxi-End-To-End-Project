@@ -1,0 +1,81 @@
+table 'Data Quality'
+
+	column 'DQ Year'
+		dataType: int64
+		isHidden
+		formatString: #,0
+		summarizeBy: none
+		sourceColumn: year_number
+
+	column 'DQ Month Number'
+		dataType: int64
+		isHidden
+		formatString: #,0
+		summarizeBy: none
+		sourceColumn: month_number
+
+	column 'DQ Month'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: year_month
+
+	column 'Source File'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: source_file
+
+	column 'Rows Read'
+		dataType: int64
+		formatString: #,0
+		summarizeBy: sum
+		sourceColumn: rows_read
+
+	column 'Exact Duplicates'
+		dataType: int64
+		formatString: #,0
+		summarizeBy: sum
+		sourceColumn: exact_duplicates
+
+	column 'Rows Valid'
+		dataType: int64
+		formatString: #,0
+		summarizeBy: sum
+		sourceColumn: rows_valid
+
+	column 'Rows Rejected'
+		dataType: int64
+		formatString: #,0
+		summarizeBy: sum
+		sourceColumn: rows_rejected
+
+	column 'Reject Pct'
+		dataType: decimal
+		formatString: 0.00
+		summarizeBy: average
+		sourceColumn: reject_pct
+
+	column 'Silver Seconds'
+		dataType: int64
+		formatString: #,0
+		summarizeBy: sum
+		sourceColumn: silver_duration_s
+
+	column 'Processed At'
+		dataType: dateTime
+		formatString: d MMM yyyy HH:mm
+		summarizeBy: none
+		sourceColumn: processed_at
+
+	column 'DQ Run'
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: run_id
+
+	partition 'Data Quality' = entity
+		mode: directLake
+		source
+			entityName: dq_month
+			schemaName: agg
+			expressionSource: DatabaseQuery
+

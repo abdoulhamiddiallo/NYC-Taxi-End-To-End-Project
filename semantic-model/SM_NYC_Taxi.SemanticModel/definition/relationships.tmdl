@@ -1,0 +1,54 @@
+relationship 0fa2d3c8-5cbb-523e-8edb-a12b797f913a
+	relyOnReferentialIntegrity
+	fromColumn: Trips.date_key
+	toColumn: Date.date_key
+
+relationship 25fdb745-c403-51eb-8605-ea7667e585ec
+	relyOnReferentialIntegrity
+	fromColumn: Trips.hour_key
+	toColumn: Hour.hour_key
+
+relationship 6675d250-d18d-52ee-8099-658d7de9b08d
+	relyOnReferentialIntegrity
+	fromColumn: Trips.pickup_zone_key
+	toColumn: 'Pickup Zone'.zone_key
+
+relationship c8b6a5da-417b-5608-9e46-3741091e8683
+	relyOnReferentialIntegrity
+	fromColumn: Trips.dropoff_zone_key
+	toColumn: 'Dropoff Zone'.zone_key
+
+relationship 8cb09008-9401-51cc-8cb8-003ef694dd66
+	relyOnReferentialIntegrity
+	fromColumn: Trips.vendor_key
+	toColumn: Vendor.vendor_key
+
+relationship f6b4c038-3815-568e-aff6-33fba530f5a4
+	relyOnReferentialIntegrity
+	fromColumn: Trips.rate_code_key
+	toColumn: 'Rate Code'.rate_code_key
+
+relationship d252e534-7c99-5821-864e-a0d69b408f37
+	relyOnReferentialIntegrity
+	fromColumn: Trips.payment_type_key
+	toColumn: 'Payment Type'.payment_type_key
+
+relationship 759d2be7-763f-5726-aebd-4e783467d6d2
+	relyOnReferentialIntegrity
+	fromColumn: Trips.distance_band_key
+	toColumn: 'Distance Band'.distance_band_key
+
+relationship 35369c28-2e36-53c2-9aad-56fd1d175d51
+	relyOnReferentialIntegrity
+	fromColumn: 'Zone Flow'.pickup_zone_key
+	toColumn: 'Pickup Zone'.zone_key
+
+relationship ea63fc5e-7aad-5ca7-ac62-16cf484784ba
+	relyOnReferentialIntegrity
+	fromColumn: 'Zone Flow'.dropoff_zone_key
+	toColumn: 'Dropoff Zone'.zone_key
+
+relationship 80bf06b3-3d13-5bae-9c0b-508c9d864c75
+	relyOnReferentialIntegrity
+	fromColumn: 'Data Quality Rules'.'Rule Month'
+	toColumn: 'Data Quality'.'DQ Month'

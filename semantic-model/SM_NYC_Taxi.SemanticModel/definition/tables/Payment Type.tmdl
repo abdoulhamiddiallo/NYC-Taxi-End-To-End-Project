@@ -1,0 +1,26 @@
+table 'Payment Type'
+
+	column payment_type_key
+		dataType: int64
+		isHidden
+		summarizeBy: none
+		sourceColumn: payment_type_key
+
+	column 'Payment Type'
+		dataType: string
+		sortByColumn: payment_type_key
+		summarizeBy: none
+		sourceColumn: payment_type_name
+
+	column 'Is Electronic'
+		dataType: boolean
+		summarizeBy: none
+		sourceColumn: is_electronic
+
+	partition 'Payment Type' = entity
+		mode: directLake
+		source
+			entityName: dim_payment_type
+			schemaName: dim
+			expressionSource: DatabaseQuery
+

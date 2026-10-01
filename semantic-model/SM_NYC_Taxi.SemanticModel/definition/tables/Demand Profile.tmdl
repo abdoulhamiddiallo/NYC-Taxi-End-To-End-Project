@@ -1,0 +1,71 @@
+table 'Demand Profile'
+
+	column 'Weekday Number'
+		dataType: int64
+		isHidden
+		formatString: #,0
+		summarizeBy: none
+		sourceColumn: day_of_week
+
+	column Weekday
+		dataType: string
+		sortByColumn: 'Weekday Number'
+		summarizeBy: none
+		sourceColumn: day_short
+
+	column 'Hour Number'
+		dataType: int64
+		isHidden
+		formatString: #,0
+		summarizeBy: none
+		sourceColumn: hour_key
+
+	column 'Hour Slot'
+		dataType: string
+		sortByColumn: 'Hour Number'
+		summarizeBy: none
+		sourceColumn: hour_label
+
+	column 'Slot Trips'
+		dataType: int64
+		formatString: #,0
+		summarizeBy: sum
+		sourceColumn: trips
+
+	column 'Trips per Slot'
+		dataType: decimal
+		formatString: #,0
+		summarizeBy: sum
+		sourceColumn: trips_per_slot
+
+	column 'Slot Revenue'
+		dataType: decimal
+		formatString: $#,0
+		summarizeBy: sum
+		sourceColumn: revenue
+
+	column 'Slot Avg Fare'
+		dataType: decimal
+		formatString: $#,0.00
+		summarizeBy: average
+		sourceColumn: avg_fare
+
+	column 'Slot Avg Duration'
+		dataType: decimal
+		formatString: #,0.0
+		summarizeBy: average
+		sourceColumn: avg_duration
+
+	column 'Slot Avg Speed'
+		dataType: decimal
+		formatString: #,0.0
+		summarizeBy: average
+		sourceColumn: avg_speed_mph
+
+	partition 'Demand Profile' = entity
+		mode: directLake
+		source
+			entityName: hourly_weekday
+			schemaName: agg
+			expressionSource: DatabaseQuery
+

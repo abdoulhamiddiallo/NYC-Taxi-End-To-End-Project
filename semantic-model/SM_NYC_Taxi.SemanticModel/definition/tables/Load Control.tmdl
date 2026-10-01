@@ -1,0 +1,57 @@
+table 'Load Control'
+
+	column 'Load Year'
+		dataType: int64
+		isHidden
+		formatString: #,0
+		summarizeBy: none
+		sourceColumn: year_number
+
+	column 'Load Month Number'
+		dataType: int64
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: month_number
+
+	column 'Silver Rows'
+		dataType: int64
+		formatString: #,0
+		summarizeBy: sum
+		sourceColumn: silver_rows
+
+	column 'Staged Rows'
+		dataType: int64
+		formatString: #,0
+		summarizeBy: sum
+		sourceColumn: staged_rows
+
+	column 'Fact Rows'
+		dataType: int64
+		formatString: #,0
+		summarizeBy: sum
+		sourceColumn: fact_rows
+
+	column 'Is Reconciled'
+		dataType: boolean
+		summarizeBy: none
+		sourceColumn: is_reconciled
+
+	column 'Load Run'
+		dataType: string
+		isHidden
+		summarizeBy: none
+		sourceColumn: last_run_id
+
+	column 'Loaded At'
+		dataType: dateTime
+		formatString: d MMM yyyy HH:mm
+		summarizeBy: none
+		sourceColumn: last_loaded_at
+
+	partition 'Load Control' = entity
+		mode: directLake
+		source
+			entityName: load_control
+			schemaName: etl
+			expressionSource: DatabaseQuery
+

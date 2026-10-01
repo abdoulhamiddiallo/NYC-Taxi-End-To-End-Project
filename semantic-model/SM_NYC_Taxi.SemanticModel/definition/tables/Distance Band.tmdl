@@ -1,0 +1,33 @@
+table 'Distance Band'
+
+	column distance_band_key
+		dataType: int64
+		isHidden
+		summarizeBy: none
+		sourceColumn: distance_band_key
+
+	column 'Distance Band'
+		dataType: string
+		sortByColumn: distance_band_key
+		summarizeBy: none
+		sourceColumn: distance_band
+
+	column 'Min Miles'
+		dataType: decimal
+		isHidden
+		summarizeBy: none
+		sourceColumn: min_miles
+
+	column 'Max Miles'
+		dataType: decimal
+		isHidden
+		summarizeBy: none
+		sourceColumn: max_miles
+
+	partition 'Distance Band' = entity
+		mode: directLake
+		source
+			entityName: dim_distance_band
+			schemaName: dim
+			expressionSource: DatabaseQuery
+

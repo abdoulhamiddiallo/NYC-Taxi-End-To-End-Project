@@ -1,0 +1,20 @@
+table Vendor
+
+	column vendor_key
+		dataType: int64
+		isHidden
+		summarizeBy: none
+		sourceColumn: vendor_key
+
+	column Vendor
+		dataType: string
+		summarizeBy: none
+		sourceColumn: vendor_name
+
+	partition Vendor = entity
+		mode: directLake
+		source
+			entityName: dim_vendor
+			schemaName: dim
+			expressionSource: DatabaseQuery
+

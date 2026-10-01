@@ -1,0 +1,59 @@
+table 'Zone Flow'
+
+	column pickup_zone_key
+		dataType: int64
+		isHidden
+		formatString: #,0
+		summarizeBy: none
+		sourceColumn: pickup_zone_key
+
+	column dropoff_zone_key
+		dataType: int64
+		isHidden
+		formatString: #,0
+		summarizeBy: none
+		sourceColumn: dropoff_zone_key
+
+	column 'Flow Trips'
+		dataType: int64
+		formatString: #,0
+		summarizeBy: sum
+		sourceColumn: trips
+
+	column 'Flow Revenue'
+		dataType: decimal
+		formatString: $#,0
+		summarizeBy: sum
+		sourceColumn: revenue
+
+	column 'Flow Avg Fare'
+		dataType: decimal
+		formatString: $#,0.00
+		summarizeBy: average
+		sourceColumn: avg_fare
+
+	column 'Flow Avg Distance'
+		dataType: decimal
+		formatString: #,0.0
+		summarizeBy: average
+		sourceColumn: avg_distance
+
+	column 'Flow Avg Duration'
+		dataType: decimal
+		formatString: #,0.0
+		summarizeBy: average
+		sourceColumn: avg_duration
+
+	column 'Flow Rank'
+		dataType: int64
+		formatString: 0
+		summarizeBy: none
+		sourceColumn: flow_rank
+
+	partition 'Zone Flow' = entity
+		mode: directLake
+		source
+			entityName: zone_flow
+			schemaName: agg
+			expressionSource: DatabaseQuery
+

@@ -1,0 +1,21 @@
+table 'Rate Code'
+
+	column rate_code_key
+		dataType: int64
+		isHidden
+		summarizeBy: none
+		sourceColumn: rate_code_key
+
+	column 'Rate Code'
+		dataType: string
+		sortByColumn: rate_code_key
+		summarizeBy: none
+		sourceColumn: rate_code_name
+
+	partition 'Rate Code' = entity
+		mode: directLake
+		source
+			entityName: dim_rate_code
+			schemaName: dim
+			expressionSource: DatabaseQuery
+

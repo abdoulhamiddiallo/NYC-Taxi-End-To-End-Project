@@ -1,0 +1,60 @@
+table 'Pickup Zone'
+
+	column zone_key
+		dataType: int64
+		isHidden
+		summarizeBy: none
+		sourceColumn: zone_key
+
+	column 'Pickup Zone'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: zone_name
+
+	column 'Pickup Borough'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: borough
+
+	column 'Pickup Service Zone'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: service_zone
+
+	column 'Pickup Zone (Borough)'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: zone_full_name
+
+	column 'Pickup Is Airport'
+		dataType: boolean
+		summarizeBy: none
+		sourceColumn: is_airport
+
+	column 'Pickup Latitude'
+		dataType: double
+		isHidden
+		dataCategory: Latitude
+		summarizeBy: none
+		sourceColumn: latitude
+
+	column 'Pickup Longitude'
+		dataType: double
+		isHidden
+		dataCategory: Longitude
+		summarizeBy: none
+		sourceColumn: longitude
+
+	column 'Pickup Area sq mi'
+		dataType: double
+		isHidden
+		summarizeBy: none
+		sourceColumn: area_sq_mi
+
+	partition 'Pickup Zone' = entity
+		mode: directLake
+		source
+			entityName: dim_zone
+			schemaName: dim
+			expressionSource: DatabaseQuery
+

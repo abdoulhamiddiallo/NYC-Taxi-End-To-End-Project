@@ -1,0 +1,32 @@
+model Model
+	culture: en-US
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	discourageImplicitMeasures
+	sourceQueryCulture: en-US
+
+	annotation __PBI_TimeIntelligenceEnabled = 0
+	annotation PBI_QueryOrder = ["DatabaseQuery"]
+
+ref table Date
+ref table Hour
+ref table 'Pickup Zone'
+ref table 'Dropoff Zone'
+ref table Vendor
+ref table 'Rate Code'
+ref table 'Payment Type'
+ref table 'Distance Band'
+ref table Trips
+ref table 'Zone Flow'
+ref table 'Demand Profile'
+ref table 'Data Quality'
+ref table 'Data Quality Rules'
+ref table 'Load Control'
+ref table 'Run Log'
+
+expression DatabaseQuery =
+		let
+		    database = Sql.Database("darotj3cokvunnehuukvqdnj7i-bxedagivo43u7mhoxpakuzsxqm.datawarehouse.fabric.microsoft.com", "8b90142e-bd44-4141-99b9-1e81dc7da692")
+		in
+		    database
+
+	annotation PBI_IncludeFutureArtifacts = False

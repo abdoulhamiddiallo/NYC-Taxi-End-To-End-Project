@@ -1,0 +1,45 @@
+table Hour
+
+	column hour_key
+		dataType: int64
+		isHidden
+		summarizeBy: none
+		sourceColumn: hour_key
+
+	column Hour
+		dataType: string
+		sortByColumn: hour_key
+		summarizeBy: none
+		sourceColumn: hour_label
+
+	column 'Hour 12'
+		dataType: string
+		sortByColumn: hour_key
+		summarizeBy: none
+		sourceColumn: hour_12
+
+	column 'Day Part'
+		dataType: string
+		sortByColumn: 'Day Part Order'
+		summarizeBy: none
+		sourceColumn: day_part
+
+	column 'Day Part Order'
+		dataType: int64
+		isHidden
+		formatString: #,0
+		summarizeBy: none
+		sourceColumn: day_part_order
+
+	column 'Is Rush Hour'
+		dataType: boolean
+		summarizeBy: none
+		sourceColumn: is_rush_hour
+
+	partition Hour = entity
+		mode: directLake
+		source
+			entityName: dim_hour
+			schemaName: dim
+			expressionSource: DatabaseQuery
+

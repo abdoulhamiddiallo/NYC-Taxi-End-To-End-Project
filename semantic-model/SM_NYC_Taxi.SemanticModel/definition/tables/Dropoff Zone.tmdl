@@ -1,0 +1,54 @@
+table 'Dropoff Zone'
+
+	column zone_key
+		dataType: int64
+		isHidden
+		summarizeBy: none
+		sourceColumn: zone_key
+
+	column 'Dropoff Zone'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: zone_name
+
+	column 'Dropoff Borough'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: borough
+
+	column 'Dropoff Service Zone'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: service_zone
+
+	column 'Dropoff Zone (Borough)'
+		dataType: string
+		summarizeBy: none
+		sourceColumn: zone_full_name
+
+	column 'Dropoff Is Airport'
+		dataType: boolean
+		summarizeBy: none
+		sourceColumn: is_airport
+
+	column 'Dropoff Latitude'
+		dataType: double
+		isHidden
+		dataCategory: Latitude
+		summarizeBy: none
+		sourceColumn: latitude
+
+	column 'Dropoff Longitude'
+		dataType: double
+		isHidden
+		dataCategory: Longitude
+		summarizeBy: none
+		sourceColumn: longitude
+
+	partition 'Dropoff Zone' = entity
+		mode: directLake
+		source
+			entityName: dim_zone
+			schemaName: dim
+			expressionSource: DatabaseQuery
+
